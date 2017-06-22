@@ -3,8 +3,8 @@ defmodule ProcessTest do
 
 alias Definition.BPMProcess
 alias Definition.BPMTask
-alias Definition.BPMLink
 alias Definition.BPMEvent
+alias Definition.BPMGateway
 
   setup do
     {:ok, process} = BPMProcess.start_link
@@ -30,36 +30,12 @@ alias Definition.BPMEvent
       BPMProcess.addTask(process, task2)
     end
 
+    def add2Gateways(process) do
+      gateway = %BPMGateway{id: 1, name: "myGateway"}
+      gateway2 = %BPMGateway{id: 2, name: "myGateway2"}
 
-
-
-  test "link 2 tasks",  %{process: process} do
-    add2Tasks(process)
-    tasks = BPMProcess.getTasks(process)
-
-    {task3, task4} = BPMLink.link(tasks[1], tasks[2], 1)
-
-
-
-    assert length(task4.incoming) == 1
-    assert length(task3.outgoing) == 1
-    assert List.first(task4.incoming).id == 1
-
-  end
-
-  test "link a task and an event",  %{process: process} do
-    add2Tasks(process)
-    tasks = BPMProcess.getTasks(process)
-
-    {task3, task4} = BPMLink.link(tasks[1], tasks[2], 1)
-
-
-
-    assert length(task4.incoming) == 1
-    assert length(task3.outgoing) == 1
-    assert List.first(task4.incoming).id == 1
-
-  end
-
+      BPMProcess.addGateway(process, gateway)
+      BPMProcess.addGateway(process, gateway2)
+    end
 
 end

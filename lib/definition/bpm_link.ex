@@ -6,7 +6,7 @@ defprotocol Definition.BPMLink do
        def link(source, target, linkId)
 end
 
-defimpl Definition.BPMLink,  for: [Any] do
+defimpl Definition.BPMLink,  for: [Definition.BPMTask, Definition.BPMEvent, Definition.BPMGateway] do
     def link(source, target, linkId) do
 
         sequence_flow = %Definition.BPMSequenceFlow{id: linkId, sourceId: source.id, targetId: target.id}
