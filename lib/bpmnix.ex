@@ -1,35 +1,32 @@
-defmodule Bpmnix do
-  use GenServer
+defmodule BPMnix.Application do
+
   @moduledoc """
-  This module creates a beam process to execute a BPMprocess
+  This module provides the main entrypoint for the BPM Application.
+
+  It is a bit unfortunate that the bpm terminology also contains the word process. Within an elixir environment
+  this can become confusing. Therefore as a matter of convention within this application,
+  every beam process is referred to as 'process' and every bpm process is referred to as 'BPMProcess'.
   """
+  # See http://elixir-lang.org/docs/stable/elixir/Application.html
+  # for more information on OTP Applications
 
-  @doc """
-  Hello world.
 
-  ## Examples
+  use Application
 
-      iex> Bpmnix.hello
-      :world
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
 
-  """
-  def hello do
-    :world
+    # Define workers and child supervisors to be supervised
+    children = [
+      supervisor(Registry, [:unique, :bpm_process_registry]),
+      supervisor(Execution.BPMProcessEngine, [:bpm_engine])
+    ]
+
+    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
+    # for other strategies and supported options
+    opts = [strategy: :one_for_one, name: BPMnix.Supervisor]
+    Supervisor.start_link(children, opts)
   end
-
-  def start_link do
-    GenServer.start_link(__MODULE__, :ok, [])
-  end
-
-  def read(pid) do
-  GenServer.call(pid, {:read})
-end
-
-def add(pid, item) do
-  GenServer.cast(pid, {:add, item})
-end
-
-
 
 
 end
