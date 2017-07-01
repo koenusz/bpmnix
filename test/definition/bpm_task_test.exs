@@ -1,4 +1,4 @@
-defmodule BPMTaskTest do
+defmodule Definition.BPMTaskTest do
   use ExUnit.Case, async: true
 
 alias Definition.BPMProcess

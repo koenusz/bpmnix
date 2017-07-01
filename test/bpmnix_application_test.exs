@@ -1,6 +1,6 @@
-defmodule BpmnixTest do
+defmodule BPMnixTest do
   use ExUnit.Case
-  doctest Bpmnix
+   doctest BPMnix
 
   # setup do
   #   {:ok, registry} = Bpmnix.start_link

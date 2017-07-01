@@ -7,6 +7,7 @@ defmodule Bpmnix.Mixfile do
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     aliases: aliases(),
      deps: deps()]
   end
 
@@ -31,5 +32,11 @@ defmodule Bpmnix.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [ {:credo, "~> 0.8", only: [:dev, :test], runtime: false} ]
+  end
+
+  defp aliases do
+  [
+    test: "test --no-start"
+  ]
   end
 end

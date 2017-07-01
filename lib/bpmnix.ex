@@ -1,4 +1,4 @@
-defmodule BPMnix.Application do
+defmodule BPMnix do
 
   @moduledoc """
   This module provides the main entrypoint for the BPM Application.
