@@ -25,27 +25,7 @@ end
 
 @bpm_process_registry_name :bpm_process_registry
 
-  # @doc """
-  #   Starts a BPMProcess
-  # """
-  # def start_process(engine, %Definition.BPMProcess{} = process) do
-  #
-  # end
-  #
-  # @doc """
-  #   Provides an abstraction point from withing a process step or an implementations to send data to metrics consumers.
-  # """
-  # def collect_metrics(engine, metric) do
-  #
-  # end
-  #
-  # @doc """
-  #   Returns a list of processes in the specified state. Call with state [] to retrieve all processes.
-  # """
-  # def get_processes(engine, processState) do
-  #
-  # end
-
+#client Api
   @doc """
     Creates a new BPMProcess
   """
@@ -76,16 +56,22 @@ Creates a new account process, based on the `process_id` integer.
 Returns a tuple such as `{:ok, process_id}` if successful.
 If there is an issue, an `{:error, reason}` tuple is returned.
 """
-def create_bpm_process_process(engine) do
-  IO.puts("start")
-  id = engine.auto_id
-  IO.puts(id)
-  case Supervisor.start_child(__MODULE__, [engine.auto_id]) do
-    {:ok, _pid} -> {:ok, engine.auto_id, %{engine | auto_id: engine.auto_id + 1}}
+def create_bpm_process_process(engine_server) do
+
+  {:ok, id} = GenServer.call(engine_server, {:id})
+  case Supervisor.start_child(__MODULE__, [id]) do
+    {:ok, _pid} -> {:ok, id}
     {:error, {:already_started, _pid}} -> {:error, :process_already_exists}
     other -> {:error, other}
   end
 end
 
+# Server Callbacks
+  def init(:ok) do
+    {:ok, %__MODULE__{}}
+  end
 
+  def handle_call({:id}, _from, engine) do
+    {:reply, {:ok, engine.auto_id},  %{engine | auto_id: engine.auto_id + 1}}
+  end
 end
