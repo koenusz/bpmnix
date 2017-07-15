@@ -3,123 +3,135 @@ defmodule Definition.BPMProcess do
 
   defstruct tasks: %{}, events: %{}, gateways: %{}
 
+
+alias Definition.BPMLink
+
+
   @moduledoc """
   This module holds the functions for executing a BPM process.
   """
 
-
     @doc """
-    Starts a new process.
+      Creates a sequence flow between a source and a target.
+      The source and the target need are tuples where the first argument
+      is one of the atoms: :task, :event, :gateway. The second argument
+      is the id of the task gateway or event you want to link.
+
+      ## Examples
+
+          iex> Definition.BPMProcess.add_sequence_flow(process,{:event, 1}, {:task, 1} )
+          :ok
+
+
     """
-    def start_link do
-      Agent.start_link(fn -> %Definition.BPMProcess{} end)
+    def add_sequence_flow(%__MODULE__{} = process, source, target, link_id) do
+
+        {:ok, source_part} = __MODULE__.get_process_part(process, source)
+        {:ok, target_part} = __MODULE__.get_process_part(process, target)
+
+        {sourceItem, targetItem} =
+          BPMLink.link(source_part, target_part, link_id)
+
+        process
+        |> __MODULE__.update(sourceItem)
+        |> __MODULE__.update(targetItem)
+
+
     end
 
-    @doc """
-    Add an task to the process.
-    """
-    def addTask(process, %Definition.BPMTask{} = task) do
-        Agent.update(process, fn state -> %{state | tasks: Map.put(state.tasks, task.id, task)} end)
+    def get_process_part(process, {:event, id}) do
+       __MODULE__.get_event_by_id(process, id)
     end
 
-    def deleteTask(process, taskId) do
-      Agent.update(process, fn state -> %{state | tasks: Map.delete(state.tasks, taskId)} end)
+    def get_process_part(process, {:task, id}) do
+       __MODULE__.get_task_by_id(process, id)
     end
 
-    @doc """
-    Deletes a task from the list and adds the argumentin its place.
-    """
-    def updateTask(process, %Definition.BPMTask{} = task) do
-      deleteTask(process, task.id)
-      addTask(process, task)
+    def get_process_part(process, {:gateway, id}) do
+       __MODULE__.get_gateway_by_id(process, id)
     end
 
-    @doc """
-    Gets a task from the `process` by `key`.
-    """
-    def getTasks(process) do
-      Agent.get(process, &Map.get(&1, :tasks))
-    end
-
-    @doc """
-    Gets a task from the `process` by `id`.
-    """
-    def getTaskById(process, id) do
-        tasks = getTasks(process)
-        tasks
-        |> Map.get(id)
-    end
 
     @doc """
     Add an event to the process.
     """
-    def addEvent(process, %Definition.BPMEvent{} = event) do
-      Agent.update(process, fn state -> %{state | events: Map.put(state.events, event.id, event)}  end)
-    end
-
-    def deleteEvent(process, eventId) do
-      Agent.update(process, fn state -> %{state | events: Map.delete(state.events, eventId)} end)
-    end
-
-    @doc """
-    Deletes a event from the list and adds the argumentin its place.
-    """
-    def updateEvent(process, %Definition.BPMEvent{} = event) do
-      deleteEvent(process, event.id)
-      addEvent(process, event)
-    end
-
-    @doc """
-    Gets a event from the `process` by `key`.
-    """
-    def getEvents(process) do
-      Agent.get(process, &Map.get(&1, :events))
-    end
-
-    @doc """
-    Gets a event from the `process` by `id`.
-    """
-    def getEventById(process, id) do
-      events = getEvents(process)
-
-      events
-      |> Map.get(id)
+    def add(process, %Definition.BPMEvent{} = event) do
+      %{process | events: Map.put(process.events, event.id, event)}
     end
 
     @doc """
     Add an gateway to the process.
     """
-    def addGateway(process, %Definition.BPMGateway{} = gateway) do
-          Agent.update(process, fn state -> %{state | gateways: Map.put(state.gateways, gateway.id, gateway)}  end)
+    def add(process, %Definition.BPMGateway{} = gateway) do
+          %{process | gateways: Map.put(process.gateways, gateway.id, gateway)}
     end
 
-    def deleteGateway(process, gatewayId) do
-      Agent.update(process, fn state -> %{state | gateways: Map.delete(state.gateways, gatewayId)} end)
+    @doc """
+    Add an task to the process.
+    """
+    def add(process, %Definition.BPMTask{} = task) do
+     %{process | tasks: Map.put(process.tasks, task.id, task)}
+    end
+
+
+    @doc """
+    Deletes a task from the list and adds the argumentin its place.
+    """
+    def update(process, %Definition.BPMTask{} = task) do
+      delete_task(process, task.id)
+      add(process, task)
     end
 
     @doc """
     Deletes a gateway from the list and adds the argumentin its place.
     """
-    def updateGateway(process, %Definition.BPMGateway{} = gateway) do
-      deleteGateway(process, gateway.id)
-      addGateway(process, gateway)
+    def update(process, %Definition.BPMGateway{} = gateway) do
+      delete_gateway(process, gateway.id)
+      add(process, gateway)
     end
 
     @doc """
-    Gets a gateway from the `process` by `key`.
+    Deletes a event from the list and adds the argumentin its place.
     """
-    def getGateways(process) do
-      Agent.get(process, &Map.get(&1, :gateways))
+    def update(process, %Definition.BPMEvent{} = event) do
+      delete_event(process, event.id)
+      add(process, event)
+    end
+
+    @doc """
+    Gets a task from the `process` by `id`.
+    """
+    def get_task_by_id(process, id) do
+        process.tasks
+        |> Map.fetch(id)
+    end
+
+    def delete_task(process, taskId) do
+     %{process | tasks: Map.delete(process.tasks, taskId)}
+    end
+
+    def delete_event(process, eventId) do
+      %{process | events: Map.delete(process.events, eventId)}
+    end
+
+    @doc """
+    Gets a event from the `process` by `id`.
+    """
+    def get_event_by_id(process, id) do
+      process.events
+      |> Map.fetch(id)
+    end
+
+    def delete_gateway(process, gatewayId) do
+      %{process | gateways: Map.delete(process.gateways, gatewayId)}
     end
 
     @doc """
     Gets a gateway from the `process` by `id`.
     """
-    def getGatewayById(process, id) do
-      gateways = getGateways(process)
-
-      gateways
-      |> Map.get(id)
+    def get_gateway_by_id(process, id) do
+      process.gateways
+      |> Map.fetch(id)
     end
 
 end

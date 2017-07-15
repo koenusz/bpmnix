@@ -66,6 +66,10 @@ def create_bpm_process_process(engine_server) do
   end
 end
 
+defp via_tuple(process_id) do
+  {:via, Registry, {@bpm_process_registry_name, process_id}}
+end
+
 # Server Callbacks
   def init(:ok) do
     {:ok, %__MODULE__{}}

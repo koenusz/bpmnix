@@ -12,20 +12,20 @@ end
 
 
 
-  def add2Gateways(process) do
+  def add_2_gateways(process) do
     gateway = %BPMGateway{id: 1, name: "myGateway1"}
     gateway2 = %BPMGateway{id: 2, name: "myGateway2"}
 
-    BPMProcess.addGateway(process, gateway)
-    BPMProcess.addGateway(process, gateway2)
+    BPMProcess.add_gateway(process, gateway)
+    BPMProcess.add_gateway(process, gateway2)
 
   end
 
 
 test "store a list of gateways", %{process: process} do
-  assert BPMProcess.getGateways(process) == %{}
-  add2Gateways(process)
-  gateways = BPMProcess.getGateways(process)
+  assert BPMProcess.get_gateways(process) == %{}
+  add_2_gateways(process)
+  gateways = BPMProcess.get_gateways(process)
 
    Map.keys(gateways)
       |> length
@@ -36,18 +36,18 @@ end
 
 test "get gateway by id", %{process: process} do
 
-  add2Gateways(process)
-  assert BPMProcess.getGatewayById(process, 1).name == "myGateway1"
+  add_2_gateways(process)
+  assert BPMProcess.get_gateway_by_id(process, 1).name == "myGateway1"
 
 end
 
 test "delete gateway", %{process: process} do
 
-  add2Gateways(process)
+  add_2_gateways(process)
 
-  gatewaysBefore = BPMProcess.getGateways(process)
-  BPMProcess.deleteGateway(process, gatewaysBefore[1].id)
-  gatewaysAfter = BPMProcess.getGateways(process)
+  gateways_before = BPMProcess.get_gateways(process)
+  BPMProcess.delete_gateway(process, gateways_before[1].id)
+  gatewaysAfter = BPMProcess.get_gateways(process)
 
   Map.keys(gatewaysAfter)
      |> length
@@ -57,13 +57,13 @@ end
 
 test "update gateway" , %{process: process} do
 
-  add2Gateways(process)
+  add_2_gateways(process)
 
-  gatewaysBefore = BPMProcess.getGateways(process)
-  BPMProcess.deleteGateway(process, gatewaysBefore[1].id)
-  updated = %{gatewaysBefore[1] | name: "this is updated"}
-  BPMProcess.updateGateway(process, updated)
-  gatewaysAfter = BPMProcess.getGateways(process)
+  gateways_before = BPMProcess.get_gateways(process)
+  BPMProcess.delete_gateway(process, gateways_before[1].id)
+  updated = %{gateways_before[1] | name: "this is updated"}
+  BPMProcess.update_gateway(process, updated)
+  gatewaysAfter = BPMProcess.get_gateways(process)
   assert gatewaysAfter[1].name == "this is updated"
 
 end
