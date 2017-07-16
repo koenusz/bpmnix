@@ -12,5 +12,5 @@ defimpl Definition.BPMLink,  for: [Definition.BPMTask, Definition.BPMEvent, Defi
         sequence_flow = %Definition.BPMSequenceFlow{id: linkId, sourceId: source.id, targetId: target.id}
         {%{source | outgoing: source.outgoing ++ [sequence_flow]},
         %{target | incoming: target.incoming ++ [sequence_flow]}}
-    end
+    end 
 end

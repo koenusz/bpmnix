@@ -21,7 +21,7 @@ alias Definition.BPMProcess
 
     test "get task by id", %{process: process} do
 
-      {:ok, task} = BPMProcess.get_task_by_id(process, 1)
+      {:ok, task} = BPMProcess.get(process,{:task, 1})
 
       assert task.name == "task 1"
 
@@ -38,7 +38,7 @@ alias Definition.BPMProcess
 
 
       process
-      |> BPMProcess.delete_task(1)
+      |> BPMProcess.delete({:task, 1})
       |> (fn process -> Map.keys(process.tasks) end).()
       |> length
       |> (fn length -> length == 1  end).()

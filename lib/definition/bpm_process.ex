@@ -26,8 +26,8 @@ alias Definition.BPMLink
     """
     def add_sequence_flow(%__MODULE__{} = process, source, target, link_id) do
 
-        {:ok, source_part} = __MODULE__.get_process_part(process, source)
-        {:ok, target_part} = __MODULE__.get_process_part(process, target)
+        {:ok, source_part} = __MODULE__.get(process, source)
+        {:ok, target_part} = __MODULE__.get(process, target)
 
         {sourceItem, targetItem} =
           BPMLink.link(source_part, target_part, link_id)
@@ -37,18 +37,6 @@ alias Definition.BPMLink
         |> __MODULE__.update(targetItem)
 
 
-    end
-
-    def get_process_part(process, {:event, id}) do
-       __MODULE__.get_event_by_id(process, id)
-    end
-
-    def get_process_part(process, {:task, id}) do
-       __MODULE__.get_task_by_id(process, id)
-    end
-
-    def get_process_part(process, {:gateway, id}) do
-       __MODULE__.get_gateway_by_id(process, id)
     end
 
 
@@ -78,7 +66,7 @@ alias Definition.BPMLink
     Deletes a task from the list and adds the argumentin its place.
     """
     def update(process, %Definition.BPMTask{} = task) do
-      delete_task(process, task.id)
+      delete(process, {:task, task.id})
       add(process, task)
     end
 
@@ -86,7 +74,7 @@ alias Definition.BPMLink
     Deletes a gateway from the list and adds the argumentin its place.
     """
     def update(process, %Definition.BPMGateway{} = gateway) do
-      delete_gateway(process, gateway.id)
+      delete(process, {:gateway, gateway.id})
       add(process, gateway)
     end
 
@@ -94,44 +82,52 @@ alias Definition.BPMLink
     Deletes a event from the list and adds the argumentin its place.
     """
     def update(process, %Definition.BPMEvent{} = event) do
-      delete_event(process, event.id)
+      delete(process, {:event, event.id})
       add(process, event)
-    end
-
-    @doc """
-    Gets a task from the `process` by `id`.
-    """
-    def get_task_by_id(process, id) do
-        process.tasks
-        |> Map.fetch(id)
-    end
-
-    def delete_task(process, taskId) do
-     %{process | tasks: Map.delete(process.tasks, taskId)}
-    end
-
-    def delete_event(process, eventId) do
-      %{process | events: Map.delete(process.events, eventId)}
     end
 
     @doc """
     Gets a event from the `process` by `id`.
     """
-    def get_event_by_id(process, id) do
+    def get(process, {:event, eventId}) do
       process.events
-      |> Map.fetch(id)
+      |> Map.fetch(eventId)
     end
 
-    def delete_gateway(process, gatewayId) do
-      %{process | gateways: Map.delete(process.gateways, gatewayId)}
+    @doc """
+    Gets a task from the `process` by `id`.
+    """
+    def get(process,  {:task, taskId}) do
+        process.tasks
+        |> Map.fetch(taskId)
     end
 
     @doc """
     Gets a gateway from the `process` by `id`.
     """
-    def get_gateway_by_id(process, id) do
+    def get(process, {:gateway, gatewayId}) do
       process.gateways
-      |> Map.fetch(id)
+      |> Map.fetch(gatewayId)
     end
+    @doc """
+      delete a task
+    """
+    def delete(process, {:task, taskId}) do
+     %{process | tasks: Map.delete(process.tasks, taskId)}
+    end
+    @doc """
+      delete a event
+    """
+    def delete(process, {:event, eventId}) do
+      %{process | events: Map.delete(process.events, eventId)}
+    end
+@doc """
+  delete a gateway
+"""
+    def delete(process, {:gateway, gatewayId}) do
+      %{process | gateways: Map.delete(process.gateways, gatewayId)}
+    end
+
+
 
 end
