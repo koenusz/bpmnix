@@ -16,13 +16,13 @@ alias Execution.BPMProcessEngine, as: Engine
     {:ok, engine: engine}
   end
 
-  test "start a process", %{engine: engine} do
-    # {:ok, process_id}
-    anyt = Engine.create_bpm_process_process(engine)
-    IO.inspect(anyt)
-    # assert Engine.bpm_process_process_exists(process_id)
-    # assert engine.auto_id == 2
-  end
+  # test "start a process", %{engine: engine} do
+  #   # {:ok, process_id}
+  #   anyt = Engine.create_bpm_process_process(engine)
+  #   IO.inspect(anyt)
+  #   # assert Engine.bpm_process_process_exists(process_id)
+  #   # assert engine.auto_id == 2
+  # end
 
 
 
