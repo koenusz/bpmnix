@@ -1,15 +1,43 @@
 defmodule Definition.BPMProcess do
 
 
-  defstruct tasks: %{}, events: %{}, gateways: %{}
+  defstruct tasks: %{}, events: %{}, gateways: %{}, status: [{:event, :start}]
 
 
 alias Definition.BPMLink
 
 
   @moduledoc """
-  This module holds the functions for executing a BPM process.
+  This module describes the data structure of a bpm process. A process is a struct with a map of tasks,
+  events and gateways where the maps key is the id of the accompanieing struct.
+
+  The default status is [:start].
+
+  It provides the functions for stepping a process.
   """
+
+
+    @doc """
+      Updates the process to go to the next step.
+
+      ## Examples
+
+         iex> Definition.BPMProcess.next_step(process)
+         {:ok, process}
+
+    """
+    def next_step(%__MODULE__{} = process) do
+
+      next = Enum.map(process.status, &get(process, &1))    #get att the current steps
+      |> Keyword.get_values(:ok)
+      |> Enum.flat_map(fn step -> step.outgoing  end)       #collect all the outgoinng sequenceflows from all the steps
+      |> Enum.map(fn outgoing -> outgoing.target  end)      #get the targets.
+
+      %{process | status: next}
+    end
+
+
+
 
     @doc """
       Creates a sequence flow between a source and a target.
@@ -19,7 +47,7 @@ alias Definition.BPMLink
 
       ## Examples
 
-          iex> Definition.BPMProcess.add_sequence_flow(process,{:event, 1}, {:task, 1} )
+          iex> Definition.BPMProcess.add_sequence_flow(process,{:event, :event1}, {:task, :task1} )
           :ok
 
 
@@ -35,8 +63,6 @@ alias Definition.BPMLink
         process
         |> __MODULE__.update(sourceItem)
         |> __MODULE__.update(targetItem)
-
-
     end
 
 
@@ -109,6 +135,15 @@ alias Definition.BPMLink
       process.gateways
       |> Map.fetch(gatewayId)
     end
+
+        @doc """
+        Gets a gateway from the `process` by `id`.
+        """
+        def get(_process, unknown ) do
+            IO.inspect(unknown)
+            {:error, :unknown}
+        end
+
     @doc """
       delete a task
     """

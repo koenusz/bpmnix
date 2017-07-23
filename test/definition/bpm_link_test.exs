@@ -10,18 +10,19 @@ alias Definition.BPMGateway
   setup do
     process =  %BPMProcess{}
     result = process
-    |> BPMProcess.add(%BPMEvent{id: 1, name: "start"})
-    |> BPMProcess.add(%BPMTask{id: 1, name: "theTask"})
-    |> BPMProcess.add(%BPMTask{id: 2, name: "theOtherTask"})
-    |> BPMProcess.add(%BPMGateway{id: 1, name: "theGateway"})
-    |> BPMProcess.add(%BPMEvent{id: 2, name: "stop"})
+    |> BPMProcess.add(%BPMEvent{id: :start, name: "start"})
+    |> BPMProcess.add(%BPMTask{id: :task1, name: "theTask"})
+    |> BPMProcess.add(%BPMTask{id: :task2, name: "theOtherTask"})
+    |> BPMProcess.add(%BPMGateway{id: :gateway1, name: "theGateway"})
+    |> BPMProcess.add(%BPMEvent{id: :stop, name: "stop"})
     {:ok, process: result}
   end
 
 
   test "link 2 process.tasks",  %{process: process} do
 
-    {task, task2} = BPMLink.link(process.tasks[1], process.tasks[2], 1)
+
+    {task, task2} = BPMLink.link(process.tasks[:task1], process.tasks[:task2], 1)
 
     assert length(task2.incoming) == 1
     assert length(task.outgoing) == 1
@@ -31,31 +32,31 @@ alias Definition.BPMGateway
 
   test "link a task and an event",  %{process: process} do
 
-    {task, event} = BPMLink.link(process.tasks[1], process.events[2], 1)
+    {task, event} = BPMLink.link(process.tasks[:task1], process.events[:stop], 1)
 
     assert length(task.outgoing) == 1
     assert length(event.incoming) == 1
     assert List.first(event.incoming).id == 1
     assert List.first(task.outgoing).id == 1
   end
-  #
-  # test "link a task and a gateway",  %{process: process} do
-  #
-  #
-  #   {task, gateway} = BPMLink.link(process.tasks[1], process.gateways[2], 1)
-  #   assert length(task.outgoing) == 1
-  #   assert length(gateway.incoming) == 1
-  #   assert List.first(gateway.incoming).id == 1
-  #   assert List.first(task.outgoing).id == 1
-  # end
-  #
-  # test "link a gateway and an event",  %{process: process} do
-  #
-  #   {gateway, event} = BPMLink.link(process.gateways[1], process.events[2], 1)
-  #   assert length(gateway.outgoing) == 1
-  #   assert length(event.incoming) == 1
-  #   assert List.first(event.incoming).id == 1
-  #   assert List.first(gateway.outgoing).id == 1
-  # end
+
+   test "link a task and a gateway",  %{process: process} do
+
+
+     {task, gateway} = BPMLink.link(process.tasks[:task1], process.gateways[:gateway1], 1)
+     assert length(task.outgoing) == 1
+     assert length(gateway.incoming) == 1
+     assert List.first(gateway.incoming).id == 1
+     assert List.first(task.outgoing).id == 1
+   end
+
+   test "link a gateway and an event",  %{process: process} do
+
+     {gateway, event} = BPMLink.link(process.gateways[:gateway1], process.events[:stop], 1)
+     assert length(gateway.outgoing) == 1
+     assert length(event.incoming) == 1
+     assert List.first(event.incoming).id == 1
+     assert List.first(gateway.outgoing).id == 1
+   end
 
 end
