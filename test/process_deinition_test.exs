@@ -1,7 +1,7 @@
-defmodule Definition.BPMTaskTest do
+defmodule ProcessDefinitionTest do
   use ExUnit.Case, async: true
 
-alias Definition.BPMProcess
+
 alias Definition.BPMTask
 alias Definition.BPMEvent
 alias Definition.BPMGateway
@@ -9,7 +9,7 @@ alias Definition.BPMGateway
 
   setup do
 
-    process = simple_process(%BPMProcess{})
+    process = simple_process(%ProcessDefinition{})
     {:ok, process: process}
   end
 
@@ -17,17 +17,17 @@ alias Definition.BPMGateway
     test "step through the process", %{process: process} do
 
 
-      assert process.status == [{:event, :start}]
-      process = BPMProcess.next_step(process)
-      assert process.status == [{:task, :task1}]
-      process = BPMProcess.next_step(process)
-      assert process.status == [{:task, :task2}]
-      process = BPMProcess.next_step(process)
-      assert process.status == [{:event, :stop}]
+
+      newstatus = ProcessDefinition.next_step(process, [{:event, :start}])
+      assert newstatus == [{:task, :task1}]
+      newstatus = ProcessDefinition.next_step(process, [{:task, :task1}])
+      assert newstatus == [{:task, :task2}]
+      newstatus = ProcessDefinition.next_step(process, [{:task, :task2}])
+      assert newstatus == [{:event, :stop}]
     end
 
     test "store a list of tasks", %{process: process} do
-      process = BPMProcess.add(process, %Definition.BPMTask{id: :task3, name: "the new task"})
+      process = ProcessDefinition.add(process, %Definition.BPMTask{id: :task3, name: "the new task"})
 
        Map.keys(process.tasks)
           |> length
@@ -37,7 +37,7 @@ alias Definition.BPMGateway
 
     test "get task by id", %{process: process} do
 
-      {:ok, task} = BPMProcess.get(process,{:task, :task1})
+      {:ok, task} = ProcessDefinition.get(process,{:task, :task1})
 
       assert task.name == "task 1"
 
@@ -54,7 +54,7 @@ alias Definition.BPMGateway
 
 
       process
-      |> BPMProcess.delete({:task, :task1})
+      |> ProcessDefinition.delete({:task, :task1})
       |> (fn process -> Map.keys(process.tasks) end).()
       |> length
       |> (fn length -> length == 1  end).()
@@ -67,7 +67,7 @@ alias Definition.BPMGateway
       refute process.tasks[:task1].name == "this is updated"
       updated = %{process.tasks[:task1] | name: "this is updated"}
 
-      process = BPMProcess.update(process, updated)
+      process = ProcessDefinition.update(process, updated)
       assert process.tasks[:task1].name == "this is updated"
 
 
@@ -79,9 +79,9 @@ alias Definition.BPMGateway
       process
       |> add_start_and_stop_events
       |> add_tasks
-      |> BPMProcess.add_sequence_flow({:event, :start}, {:task, :task1}, 1)
-      |> BPMProcess.add_sequence_flow({:task, :task1}, {:task, :task2}, 2)
-      |> BPMProcess.add_sequence_flow({:task, :task2}, {:event, :stop}, 3)
+      |> ProcessDefinition.add_sequence_flow({:event, :start}, {:task, :task1}, 1)
+      |> ProcessDefinition.add_sequence_flow({:task, :task1}, {:task, :task2}, 2)
+      |> ProcessDefinition.add_sequence_flow({:task, :task2}, {:event, :stop}, 3)
 
     end
 
@@ -90,8 +90,8 @@ alias Definition.BPMGateway
       stop = %BPMEvent{id: :stop, name: "stop"}
 
       process
-      |> BPMProcess.add( start)
-      |> BPMProcess.add( stop)
+      |> ProcessDefinition.add( start)
+      |> ProcessDefinition.add( stop)
     end
 
     def add_tasks(process) do
@@ -99,8 +99,8 @@ alias Definition.BPMGateway
       task2 = %BPMTask{id: :task2, name: "task 2"}
 
       process
-      |> BPMProcess.add(task)
-      |> BPMProcess.add(task2)
+      |> ProcessDefinition.add(task)
+      |> ProcessDefinition.add(task2)
     end
 
     def add_gateways(process) do
@@ -108,7 +108,7 @@ alias Definition.BPMGateway
       gateway2 = %BPMGateway{id: 2, name: "myGateway2"}
 
       process
-      |> BPMProcess.add(gateway)
-      |> BPMProcess.add(gateway2)
+      |> ProcessDefinition.add(gateway)
+      |> ProcessDefinition.add(gateway2)
     end
 end

@@ -1,20 +1,19 @@
 defmodule Definition.BPMLinkTest do
   use ExUnit.Case, async: true
 
-alias Definition.BPMProcess
 alias Definition.BPMLink
 alias Definition.BPMTask
 alias Definition.BPMEvent
 alias Definition.BPMGateway
 
   setup do
-    process =  %BPMProcess{}
+    process =  %ProcessDefinition{}
     result = process
-    |> BPMProcess.add(%BPMEvent{id: :start, name: "start"})
-    |> BPMProcess.add(%BPMTask{id: :task1, name: "theTask"})
-    |> BPMProcess.add(%BPMTask{id: :task2, name: "theOtherTask"})
-    |> BPMProcess.add(%BPMGateway{id: :gateway1, name: "theGateway"})
-    |> BPMProcess.add(%BPMEvent{id: :stop, name: "stop"})
+    |> ProcessDefinition.add(%BPMEvent{id: :start, name: "start"})
+    |> ProcessDefinition.add(%BPMTask{id: :task1, name: "theTask"})
+    |> ProcessDefinition.add(%BPMTask{id: :task2, name: "theOtherTask"})
+    |> ProcessDefinition.add(%BPMGateway{id: :gateway1, name: "theGateway"})
+    |> ProcessDefinition.add(%BPMEvent{id: :stop, name: "stop"})
     {:ok, process: result}
   end
 
