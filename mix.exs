@@ -7,6 +7,7 @@ defmodule Bpmnix.Mixfile do
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_paths: elixirc_paths(Mix.env),
      aliases: aliases(),
      deps: deps()]
   end
@@ -19,6 +20,14 @@ defmodule Bpmnix.Mixfile do
     [extra_applications: [:logger],
     mod: {BPMnix, []}
   ]
+  end
+
+  defp elixirc_paths :test do
+    ["lib", "test/support"]
+  end
+
+  defp elixirc_paths _ do
+    ["lib"]
   end
 
   # Dependencies can be Hex packages:

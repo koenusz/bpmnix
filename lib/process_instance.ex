@@ -4,6 +4,8 @@ defmodule ProcessInstance do
     Represent an instance of the process definition.
 """
 
+
+
      @enforce_keys [:id, :history, :status, :process_definition]
     defstruct id: nil, history: [] , status: [{:event, :start}], process_definition: nil
 
@@ -11,7 +13,7 @@ defmodule ProcessInstance do
     defmacro __using__(_options) do
         quote do
             import unquote(__MODULE__)
-            Module.register_attribute __MODULE__, :steps, accumuilate: true
+            Module.register_attribute __MODULE__, :steps, accumulate: true
             @before_compile unquote(__MODULE__)
         end
     end
@@ -19,10 +21,22 @@ defmodule ProcessInstance do
     defmacro __before_compile__(_env) do
         quote do
               def print_steps do
-#                IO.puts "steps registered are (#{inspect @steps})"
+                IO.puts "steps registered are (#{inspect @steps})"
               end
         end
 
+    end
+
+    defmacro task(id, do: implementation) do
+        quote do: step({:task, unquote(id)}, do: unquote(implementation))
+    end
+
+    defmacro event(id, do: implementation) do
+        quote do: step({:event, unquote(id)}, do: unquote(implementation))
+    end
+
+    defmacro gateway(id, do: implementation) do
+        quote do: step({:gateway, unquote(id)}, do: unquote(implementation))
     end
 
     defmacro step({type, id}, do: implementation) do
