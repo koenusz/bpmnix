@@ -8,59 +8,53 @@ defmodule ProcessInstanceTest do
                             task_mytestingId: 0,
                             task_taskId: 0,
                             event_start: 0,
-                            gateway_decide: 0,
-                            new_instance: 2
+                            gateway_decide: 0
                             ]
 
-    defmodule ProcessInstanceTestHelper do
-        use ProcessInstance
+    setup do
+      instance = ProcessInstance.new_instance(:testId, simple_process())
+      {:ok, instance: instance}
+    end
 
-          step({:task, :mytestingId}) do
-            IO.puts("testing this step")
-          end
+    test "create a new instance", %{instance: instance} do
+        assert instance.id == :testId
+        assert instance.history == []
+        assert instance.status == [{:event, :start}]
+        assert instance.process_definition.id == :simple_process
+    end
 
-          task(:taskId) do
-           IO.puts("testing this task")
-           end
+    test "go to the next step", %{instance: instance} do
+        nextInstance = ProcessInstance.next_step(instance)
 
-           event(:start) do
-            IO.puts("testing this event")
-           end
-
-           gateway(:decide) do
-            IO.puts("testing this gateway")
-           end
+        assert nextInstance.status == [task: :task1]
+        assert nextInstance.history == [event: :start]
     end
 
 
-    test "create a new instance" do
-      instance = ProcessInstanceTestHelper.new_instance :newId, simple_process()
-      assert instance.id == :newId
-      assert instance.history == []
-      assert instance.status == [{:event, :start}]
-      assert instance.process_definition.id == :simple_process
-    end
+#    test "complete a process", %{instance: instance} do
+#
+#    end
 
     test "the helper has all the functions" do
-      assert (@functions_in_instance -- ProcessInstanceTestHelper.__info__ :functions)  == []
+      assert (@functions_in_instance -- Support.ProcessImplementation.__info__ :functions)  == []
     end
 
     test "create a step" do
      assert capture_io(fn ->
-          ProcessInstanceTestHelper.task_mytestingId
+          Support.ProcessImplementation.task_mytestingId
          end) == "testing this step" <> "\n"
     end
-    
+
     test "create a task" do
         assert capture_io(fn ->
-          ProcessInstanceTestHelper.task_taskId
+          Support.ProcessImplementation.task_taskId
          end) == "testing this task" <> "\n"
     end
 
     test "print steps" do
 
        assert capture_io(fn ->
-            ProcessInstanceTestHelper.print_steps
+            Support.ProcessImplementation.print_steps
            end) == "steps registered are ([{:decide}, {:start}, {:taskId}, {:mytestingId}])" <> "\n"
     end
 

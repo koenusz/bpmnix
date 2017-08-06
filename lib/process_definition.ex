@@ -46,19 +46,26 @@ alias Definition.BPMLink
 
 
     """
-    def add_sequence_flow(%__MODULE__{} = process, source, target, link_id) do
+    def add_sequence_flow(%__MODULE__{} = definition, source, target, link_id) do
 
-        {:ok, source_part} = __MODULE__.get(process, source)
-        {:ok, target_part} = __MODULE__.get(process, target)
+        {:ok, source_part} = __MODULE__.get(definition, source)
+        {:ok, target_part} = __MODULE__.get(definition, target)
 
         {sourceItem, targetItem} =
           BPMLink.link(source_part, target_part, link_id)
 
-        process
+        definition
         |> __MODULE__.update(sourceItem)
         |> __MODULE__.update(targetItem)
     end
 
+
+    @doc """
+        Provides all the ids of the steps that this definition contains.
+    """
+    def list_step_ids(definition) do
+        Map.keys(definition.tasks) ++ Map.keys(definition.events) ++ Map.keys(definition.gateways)
+    end
 
     @doc """
     Add an event to the process.

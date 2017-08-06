@@ -14,7 +14,6 @@ defmodule Support.ProcessDefinition do
         |> ProcessDefinition.add_sequence_flow({:event, :start}, {:task, :task1}, 1)
         |> ProcessDefinition.add_sequence_flow({:task, :task1}, {:task, :task2}, 2)
         |> ProcessDefinition.add_sequence_flow({:task, :task2}, {:event, :stop}, 3)
-
       end
 
       def add_start_and_stop_events(process) do
