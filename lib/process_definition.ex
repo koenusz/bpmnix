@@ -1,7 +1,7 @@
 defmodule ProcessDefinition do
 
-
-  defstruct tasks: %{}, events: %{}, gateways: %{}
+    @enforce_keys :id
+  defstruct id: nil, tasks: %{}, events: %{}, gateways: %{}
 
 
 alias Definition.BPMLink

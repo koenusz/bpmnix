@@ -6,7 +6,7 @@ defmodule ProcessInstance do
 
 
 
-     @enforce_keys [:id, :history, :status, :process_definition]
+     @enforce_keys [:id, :process_definition]
     defstruct id: nil, history: [] , status: [{:event, :start}], process_definition: nil
 
 
@@ -22,6 +22,10 @@ defmodule ProcessInstance do
         quote do
               def print_steps do
                 IO.puts "steps registered are (#{inspect @steps})"
+              end
+
+              def new_instance(id, definition) do
+                %ProcessInstance{id: id, process_definition: definition}
               end
         end
 

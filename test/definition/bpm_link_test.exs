@@ -7,8 +7,8 @@ alias Definition.BPMEvent
 alias Definition.BPMGateway
 
   setup do
-    process =  %ProcessDefinition{}
-    result = process
+
+    result = %ProcessDefinition{id: :link}
     |> ProcessDefinition.add(%BPMEvent{id: :start, name: "start"})
     |> ProcessDefinition.add(%BPMTask{id: :task1, name: "theTask"})
     |> ProcessDefinition.add(%BPMTask{id: :task2, name: "theOtherTask"})

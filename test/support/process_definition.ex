@@ -6,9 +6,9 @@ defmodule Support.ProcessDefinition do
   alias Definition.BPMGateway
 
    # setup the test data
-      def simple_process(process) do
+      def simple_process() do
 
-        process
+        %ProcessDefinition{id: :simple_process}
         |> add_start_and_stop_events
         |> add_tasks
         |> ProcessDefinition.add_sequence_flow({:event, :start}, {:task, :task1}, 1)
