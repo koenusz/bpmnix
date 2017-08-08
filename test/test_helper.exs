@@ -4,4 +4,4 @@
 #   Application.ensure_all_started(app)
 # end
 
-ExUnit.start()
+ExUnit.start(colors: [enabled: true])
