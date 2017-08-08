@@ -7,8 +7,9 @@ defstruct auto_id: 1
 @moduledoc """
   This module is responsible for everything relating to the execution of a process.
     This includes:
-    - starting a process,
-    - deligating the execution of the steps to their implementation,
+    - creating a new instance and holding its state
+    - provide a link between a process instance and the implementation
+    - deligating the execution of the steps to their implementation, each in their own process
     - processing incoming and outgoing events
     - logging errors
     - collecting metadata
