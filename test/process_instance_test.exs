@@ -6,12 +6,12 @@ defmodule ProcessInstanceTest do
 
 
     setup do
-      instance = ProcessInstance.new_instance(:testId, simple_process())
+      instance = ProcessInstance.new_instance(1 , simple_process())
       {:ok, instance: instance}
     end
 
     test "create a new instance", %{instance: instance} do
-        assert instance.id == :testId
+        assert instance.id == 1
         assert instance.history == []
         assert instance.status == [{:event, :start}]
         assert instance.process_definition.id == :simple_process
@@ -25,10 +25,12 @@ defmodule ProcessInstanceTest do
     end
 
 
-#    test "complete a process", %{instance: instance} do
-#
-#    end
+    test "complete a process", %{instance: instance} do
+        refute instance
+    end
 
-
+    test "store an error", %{instance: instance} do
+        refute instance
+    end
 
 end

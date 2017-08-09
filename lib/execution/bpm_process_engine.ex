@@ -27,30 +27,30 @@ end
 @bpm_process_registry_name :bpm_process_registry
 
 #client Api
-  @doc """
-    Creates a new BPMProcess
-  """
-  def find_process(process_id) when is_integer(process_id) do
-
-    case Registry.lookup(@bpm_process_registry_name, process_id) do
-      [process] -> {:ok, process}
-      [] -> {:error, "No process found for id #{process_id}"}
-    end
-  end
-
-  @doc """
-Determines if a `Execution.BpmProcess`  exists, based on the `process_id` provided.
-Returns a boolean.
-## Example
-    iex> Execution.BpmProcess.BpmProcess_process_exists?(6)
-    false
-"""
-def bpm_process_process_exists?(process_id) when is_integer(process_id) do
-  case Registry.lookup(@bpm_process_registry_name, process_id) do
-    [] -> false
-    _ -> true
-  end
-end
+#  @doc """
+#    Creates a new BPMProcess
+#  """
+#  def find_process(process_id) when is_integer(process_id) do
+#
+#    case Registry.lookup(@bpm_process_registry_name, process_id) do
+#      [process] -> {:ok, process}
+#      [] -> {:error, "No process found for id #{process_id}"}
+#    end
+#  end
+#
+#  @doc """
+#Determines if a `Execution.BpmProcess`  exists, based on the `process_id` provided.
+#Returns a boolean.
+### Example
+#    iex> Execution.BpmProcess.BpmProcess_process_exists?(6)
+#    false
+#"""
+#def bpm_process_process_exists?(process_id) when is_integer(process_id) do
+#  case Registry.lookup(@bpm_process_registry_name, process_id) do
+#    [] -> false
+#    _ -> true
+#  end
+#end
 
 @doc """
 Creates a new account process, based on the `process_id` integer.
@@ -77,6 +77,12 @@ end
   end
 
   def handle_call({:id}, _from, engine) do
-    {:reply, {:ok, engine.auto_id},  %{engine | auto_id: engine.auto_id + 1}}
+    {:reply, {:ok, create_process_id(engine)}, %{engine | auto_id: engine.auto_id + 1} }
   end
+
+
+  defp create_process_id(engine) do
+    String.to_atom "processId" <> engine.auto_id
+  end
+
 end
