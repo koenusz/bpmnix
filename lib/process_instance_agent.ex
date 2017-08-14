@@ -4,8 +4,7 @@ defmodule ProcessInstanceAgent do
   This module is a wrapping agent around the process instance functional datastructure.
 """
 
-    def start_link(opts) do
-        [id: id, process_definition: process] = opts
+    def start_link(id: id, process_definition: process) do
         Agent.start_link( fn -> ProcessInstance.new_instance(id, process) end)
     end
 
