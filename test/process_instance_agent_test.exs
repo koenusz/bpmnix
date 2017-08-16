@@ -6,22 +6,29 @@ defmodule ProcessInstanceAgentTest do
   import Support.ProcessDefinition
 
   setup do
-    process = simple_process()
-    {:ok, instance_agent_pid} = start_supervised({ProcessInstanceAgent, [id: 1, process_definition: process]})
-    {:ok, instance_agent_pid: instance_agent_pid}
+    case ProcessInstanceSupervisor.start_link do
+      {:ok, sup } -> assert Process.alive?(sup)
+      {:error, {:already_started, sup} } -> assert Process.alive?(sup)
+    end
+
+    {:ok, agent} = ProcessInstanceSupervisor.start_process [1, simple_process()]
+    {:ok, agent: agent}
   end
 
-  test "start an agent with a process instance", %{instance_agent_pid: instance_agent_pid} do
+  test "start an agent with a process instance", %{agent: agent} do
 
-    assert ProcessInstanceAgent.getStatus(instance_agent_pid) == [{:event, :start}]
-    assert ProcessInstanceAgent.getHistory(instance_agent_pid) == []
+    assert ProcessInstanceAgent.getId(agent) == 1
+    assert ProcessInstanceAgent.getStatus(agent) == [{:event, :start}]
+    assert ProcessInstanceAgent.getHistory(agent) == []
 
   end
 
-  test "take a step in the process", %{instance_agent_pid: instance_agent_pid} do
-    ProcessInstanceAgent.next_step(instance_agent_pid)
-    assert ProcessInstanceAgent.getStatus(instance_agent_pid) == [{:task, :task1}]
-    assert ProcessInstanceAgent.getHistory(instance_agent_pid) == [{:event, :start}]
+  test "take a step in the process", %{agent: agent} do
+
+    assert ProcessInstanceAgent.getId(agent) == 1
+    ProcessInstanceAgent.next_step(agent)
+    assert ProcessInstanceAgent.getStatus(agent) == [{:task, :task1}]
+    assert ProcessInstanceAgent.getHistory(agent) == [{:event, :start}]
   end
 
 end

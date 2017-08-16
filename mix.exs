@@ -26,6 +26,10 @@ defmodule Bpmnix.Mixfile do
     ["lib", "test/support"]
   end
 
+  defp elixirc_paths :dev do
+    ["lib", "test/support"]
+  end
+
   defp elixirc_paths _ do
     ["lib"]
   end

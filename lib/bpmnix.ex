@@ -17,13 +17,12 @@ defmodule BPMnix do
     import Supervisor.Spec, warn: false
 
     # Define workers and child supervisors to be supervised
-    children = []
+#    children = []
 
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_all, name: ProcessInstanceSupervisor]
-    Supervisor.start_link(children, opts)
+    ProcessInstanceSupervisor.start_link
   end
 
 

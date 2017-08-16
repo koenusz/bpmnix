@@ -6,9 +6,11 @@ defmodule ProcessInstanceSupervisorTest do
 
   test "start a process instance with the supervisor" do
 
-    {:ok, sup } = ProcessInstanceSupervisor.start_link
-    assert Process.alive?(sup)
-    {:ok, agent} = ProcessInstanceSupervisor.start_process(id: 1, process_definition: simple_process())
+    case ProcessInstanceSupervisor.start_link do
+      {:ok, sup } -> assert Process.alive?(sup)
+      {:error, {:already_started, sup} } -> assert Process.alive?(sup)
+    end
+    {:ok, agent} = ProcessInstanceSupervisor.start_process [1, simple_process()]
     assert Process.alive?(agent)
 
     assert ProcessInstanceAgent.getStatus(agent) == [{:event, :start}]
