@@ -14,15 +14,19 @@ defmodule BPMnix do
   use Application
 
   def start(_type, _args) do
-    import Supervisor.Spec, warn: false
+
 
     # Define workers and child supervisors to be supervised
-#    children = []
+    children = [
+      ProcessInstanceSupervisor,
+      {Registry, [keys: :unique, name: :process_instance_registry]}
+    ]
 
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    ProcessInstanceSupervisor.start_link
+    opts = [strategy: :one_for_all, name: BPMnix.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 
 
