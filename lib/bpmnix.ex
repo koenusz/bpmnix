@@ -19,7 +19,8 @@ defmodule BPMnix do
     # Define workers and child supervisors to be supervised
     children = [
       ProcessInstanceSupervisor,
-      {Registry, [keys: :unique, name: :process_instance_registry]}
+      {Registry, [keys: :unique, name: :process_instance_registry
+      ]}
     ]
 
 
