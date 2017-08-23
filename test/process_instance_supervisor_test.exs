@@ -24,8 +24,6 @@ defmodule ProcessInstanceSupervisorTest do
 
     #let it crash
     kill_and_assert_down(pid)
-
-
     wait_for_id(1)
 
     # test if the process is registered under its own id
@@ -35,8 +33,8 @@ defmodule ProcessInstanceSupervisorTest do
 
   end
 
-  #temporary
-  test "are temporary ProcessInstanceAgent" do
+
+  test "child_spec of ProcessInstanceAgent is permanent" do
     assert Supervisor.child_spec(ProcessInstanceAgent, []).restart == :permanent
   end
 
