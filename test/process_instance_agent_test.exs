@@ -3,6 +3,8 @@ defmodule ProcessInstanceAgentTest do
 
   @moduledoc false
 
+  @history [%{data: %{}, step: [event: :start], version: 0.0}]
+
   import Support.ProcessDefinition
 
   setup do
@@ -27,7 +29,7 @@ defmodule ProcessInstanceAgentTest do
     assert ProcessInstanceAgent.get(1).id == 1
     ProcessInstanceAgent.next_step(1)
     assert ProcessInstanceAgent.getStatus(1) == [{:task, :task1}]
-    assert ProcessInstanceAgent.getHistory(1) == [{:event, :start}]
+    assert ProcessInstanceAgent.getHistory(1) == @history
   end
 
 end
