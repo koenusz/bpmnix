@@ -3,6 +3,9 @@ defmodule ProcessInstance do
   @moduledoc"""
     Represent an instance of the process definition.
 
+    Process instances have time travelling built into them. The rewind function
+    can pring the process instance into a previous state.
+
     The versioning is semantic, it is a list consisting of two items. The
     first item represents the amount of updates done in the current branch.
     The second number is the branch number. The branch number starts at 0 and
@@ -41,7 +44,8 @@ defmodule ProcessInstance do
   end
 
   @doc """
-  Updates the data map in the data field, adds a new historyy item and bumps the version.
+  Updates the data map in the data field, adds a new history item and increases
+  the update in the version by 1.
   """
 
   def update_data(instance, %{} = data) do
@@ -54,7 +58,7 @@ defmodule ProcessInstance do
   """
   #  TODO: probably send the instance to permanent storage.
   def complete(instance) do
-    %{instance | completed?: true}
+    %{instance | history: update_history(instance), completed?: true}
   end
 
 
@@ -63,6 +67,8 @@ defmodule ProcessInstance do
   It will not recieve the specified version as new version. Rather it will set the update to 0
   and use the branch of the instance + 1. The state of the instance will be reset to the way
   it was during the specified version.
+
+  The history of the instance will not be deleted. A rewind creates its own history update.
   """
   def rewind(instance, to_version) do
 
