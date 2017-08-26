@@ -12,10 +12,10 @@ defmodule ProcessInstance do
 
   @enforce_keys [:id, :process_definition, :data]
   defstruct id: nil,
-            version: [
+            version: %{
               update: 0,
               branch: 0
-            ],
+            },
             history: [],
             status: [{:event, :start}],
             data: %{},
@@ -28,7 +28,6 @@ defmodule ProcessInstance do
   Creates a new instance for this process definition.
   """
   def new_instance(id, definition, data \\ %{}) do
-    history = %{version: 0.0, step: [{:event, :start}], data: data}
     %ProcessInstance{id: id, process_definition: definition, data: data}
   end
 
@@ -51,7 +50,9 @@ defmodule ProcessInstance do
 
   @doc """
   Completes the process instance.
+
   """
+  #  TODO: probably send the instance to permanent storage.
   def complete(instance) do
     %{instance | completed?: true}
   end
@@ -59,15 +60,38 @@ defmodule ProcessInstance do
 
   @doc """
   Rewinds the instance to the state the instance was in when it had the specified version.
-  It will not recieve the specified version as new version.
-
+  It will not recieve the specified version as new version. Rather it will set the update to 0
+  and use the branch of the instance + 1. The state of the instance will be reset to the way
+  it was during the specified version.
   """
-  def rewind(instance, version) do
+  def rewind(instance, to_version) do
 
+
+    case history_item(instance.history, to_version) do
+      {:ok, %{data: data, status: _, version: _}} ->
+        %{
+          instance
+        |
+          data: data,
+          history: update_history(instance),
+          version: version_new_branch(instance)
+        }
+        {:error, message} ->  {:error, message}
+    end
   end
 
-  defp history(data) do
-    %{version: 0.0, step: [{:event, :start}], data: data}
+  @doc"""
+  Returns the history item associated with the version.
+  """
+  def history_item(history, version) do
+    filtered = history
+    |> Enum.filter(fn history -> history.version == version end)
+
+    case length(filtered) do
+    x when x > 1 -> {:error, "multiple history items in history for version #{inspect version}"}
+    x when x == 0 -> {:error, "no history items for version #{inspect version}"}
+    x when x == 1 -> {:ok, Enum.at(filtered, 0)}
+    end
   end
 
   defp update_history(instance) do
@@ -80,19 +104,18 @@ defmodule ProcessInstance do
   end
 
   defp version_update(instance) do
-    [
+    %{
       update: instance.version[:update] + 1,
       branch: instance.version[:branch]
-    ]
+    }
   end
 
-  defp version_branch(instance) do
-    [
-      update: instance.version[:update] ,
+  defp version_new_branch(instance) do
+    %{
+      update: 0,
       branch: instance.version[:branch] + 1
-    ]
+    }
   end
-
 
 end
 

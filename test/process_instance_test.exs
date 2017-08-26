@@ -6,35 +6,21 @@ defmodule ProcessInstanceTest do
   @first_step_history_with_data [
     %{
       data: %{
-        name: "my_data"
+        name: "start_data"
       },
       status: [
         event: :start
       ],
-      version: [
+      version: %{
         update: 0,
         branch: 0
-      ]
-    }
-  ]
-
-  @first_step_history_no_data [
-    %{
-      data: %{
-      },
-      status: [
-        event: :start
-      ],
-      version: [
-        update: 0,
-        branch: 0
-      ]
+      }
     }
   ]
 
 
   setup do
-    instance = ProcessInstance.new_instance(1, simple_process())
+    instance = ProcessInstance.new_instance(1, simple_process(), %{name: "start_data"})
     {:ok, instance: instance}
   end
 
@@ -48,8 +34,8 @@ defmodule ProcessInstanceTest do
   test "go to the next step", %{instance: instance} do
     nextInstance = ProcessInstance.next_step(instance)
     assert nextInstance.status == [task: :task1]
-    assert nextInstance.history == @first_step_history_no_data
-    assert nextInstance.version == [update: 1, branch: 0]
+    assert nextInstance.history == @first_step_history_with_data
+    assert nextInstance.version == %{update: 1, branch: 0}
   end
 
   test "add data to an instance" do
@@ -59,13 +45,13 @@ defmodule ProcessInstanceTest do
   end
 
   test "update data" do
-    with_data = ProcessInstance.new_instance(1, simple_process(), %{name: "my_data"})
-    assert with_data.data == %{name: "my_data"}
+    with_data = ProcessInstance.new_instance(1, simple_process(), %{name: "start_data"})
+    assert with_data.data == %{name: "start_data"}
     assert with_data.history == []
     with_new_data = ProcessInstance.update_data(with_data, %{name: "updated"})
     assert with_new_data.data == %{name: "updated"}
     assert with_new_data.history == @first_step_history_with_data
-    assert with_new_data.version == [update: 1, branch: 0]
+    assert with_new_data.version == %{update: 1, branch: 0}
   end
 
   test "complete a process", %{instance: instance} do
@@ -87,21 +73,26 @@ defmodule ProcessInstanceTest do
   end
 
   test "rewind to a previous step and start a new branch", %{instance: instance} do
-    nextInstance = ProcessInstance.next_step(instance)
-    assert nextInstance.version == 1.0
+    with_new_data = ProcessInstance.update_data(instance, %{name: "updated"})
+    nextInstance = ProcessInstance.next_step(with_new_data)
+    rewound = ProcessInstance.rewind(nextInstance, %{update: 0, branch: 0} )
 
-    to_version = 0.0
-    rewinded = ProcessInstance.rewind(nextInstance, to_version)
-    assert rewinded.version == 0.1
+    assert nextInstance.version == %{update: 2, branch: 0}
+    assert nextInstance.data == %{name: "updated"}
+
+    assert rewound.version == %{update: 0, branch: 1}
+    assert rewound.data == %{name: "start_data"}
   end
 
   test "rewind fails due to version unknown", %{instance: instance} do
-    nextInstance = ProcessInstance.next_step(instance)
-    assert nextInstance.version == 1.0
+    with_new_data = ProcessInstance.update_data(instance, %{name: "updated"})
+    nextInstance = ProcessInstance.next_step(with_new_data)
 
-    to_version = 2.0
-    {:error, :version_not_in_instance} = ProcessInstance.rewind(instance, to_version)
+    assert nextInstance.version == %{update: 2, branch: 0}
+    assert nextInstance.data == %{name: "updated"}
 
+    {:error, message} = ProcessInstance.rewind(nextInstance, %{update: 10, branch: 0} )
+    assert message == "no history items for version %{branch: 0, update: 10}"
   end
 
 
