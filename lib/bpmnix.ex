@@ -19,6 +19,7 @@ defmodule BPMnix do
     # Define workers and child supervisors to be supervised
     children = [
       ProcessInstanceSupervisor,
+      ProcessEngineSupervisor,
       {Registry, [keys: :unique, name: :process_instance_registry
       ]}
     ]
@@ -30,5 +31,13 @@ defmodule BPMnix do
     Supervisor.start_link(children, opts)
   end
 
+
+  def start_process(business_id, definition_id) do
+
+  end
+
+  def event(event_id, event_data) do
+
+  end
 
 end
