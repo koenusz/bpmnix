@@ -64,10 +64,6 @@ defmodule ProcessInstanceTest do
     assert length(instance.errors) > 0
   end
 
-  test "execute a task", %{instance: instance} do
-    assert instance.task.completed > 0
-  end
-
   test "collect step metrics", %{instance: instance} do
     assert instance.task.endtime > 0
   end

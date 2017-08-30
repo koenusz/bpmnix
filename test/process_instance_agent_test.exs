@@ -3,7 +3,7 @@ defmodule ProcessInstanceAgentTest do
 
   @moduledoc false
 
-  @history [%{data: %{}, step: [event: :start], version: 0.0}]
+  @history [%{data: %{}, version: %{branch: 0, update: 0}, status: [event: :start]}]
 
   import Support.ProcessDefinition
 
