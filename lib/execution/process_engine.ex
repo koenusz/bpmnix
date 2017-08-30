@@ -23,42 +23,73 @@ defmodule ProcessEngine do
   @doc """
   Starts the engine.
   """
-  def start_link(args) do
-    {:ok, pid} = ProcessInstanceSupervisor.start_process(args)
-    GenServer.start_link(__MODULE__, pid , name: args.business_id)
+  #  TODO definition should be changed to definition_id
+  def start_link(process_id, %ProcessDefinition{} = process_definition) do
+    {:ok, _pid} = ProcessInstanceSupervisor.start_process([process_id, process_definition])
+    GenServer.start_link(__MODULE__, process_id)
   end
 
-
+  @doc """
+  Executes the implementation of a task with the associated task_id.
+  """
   def execute_task(implementation, task_id, args) do
     task = "task_" <> Atom.to_string(task_id)
-    |> String.to_atom
+           |> String.to_atom
     apply(implementation, task, args)
   end
 
+  @doc """
+  This function retrieves the current state of the process instance.
 
+  During execution this is the safest way of retrieving state, this call
+  prevents race conditions that are possible when adressing the ProcessInstanceAgent directly.
+  """
+  def process_instance(pid) do
+    GenServer.call(pid, :instance)
+  end
 
 
   @doc """
   Recieves events targeted at the
   """
-  def event(event, pid) do
-    GenServer.cast(pid, {:event, event})
+  def event(pid, event) do
+    GenServer.cast(pid, event)
   end
-
-  def handle_cast({:event}, _from, engine) do
-  end
-
 
   @doc """
-  Creates a new account process, based on the `process_id` integer.
-  Returns a tuple such as `{:ok, process_id}` if successful.
-  If there is an issue, an `{:error, reason}` tuple is returned.
+  First call the process instance agent to determine the next step(s) in the process,
+  then call self to execute these steps.
   """
-  #  def create_bpm_process_process(engine_server) do
-  #
-  #
-  #  end
 
+  def next_step(process_id) do
+    ProcessInstanceAgent.next_step process_id
+
+    #    case for task, event or gateway
+    #    call the appropriate function
+  end
+
+#  callbacks
+
+  def handle_cast({:event, event}, process_id) do
+    present = ProcessInstanceAgent.getStatus(process_id)
+              |> Enum.member?({:event, event})
+    if present do
+      next_step process_id
+    else
+      ProcessInstanceAgent.register_error(
+        event,
+        process_id,
+        "Event #{event} not present in statuslist of process Instance #{process_id}"
+      )
+    end
+
+    {:noreply, process_id}
+  end
+
+  def handle_call(:instance, _from, process_id) do
+    instance = ProcessInstanceAgent.get process_id
+    {:reply, instance, process_id}
+  end
 
   def child_spec(_args) do
     %{
