@@ -53,8 +53,17 @@ defmodule ProcessInstance do
   end
 
   @doc """
-  Completes the process instance.
+  Stores an error that occured in the system on the process instance.
+  """
+  def register_error(instance, step_id,  message) do
+    %BPMTaskError{ step_id: step_id, instance_version: instance.version  , error_message: message}
+    |> fn error ->  [error] ++ instance.errors end.()
+    |> fn errors -> %{instance | errors: errors} end.()
 
+  end
+
+  @doc """
+  Completes the process instance.
   """
   #  TODO: probably send the instance to permanent storage.
   def complete(instance) do

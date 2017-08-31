@@ -60,8 +60,8 @@ defmodule ProcessInstanceTest do
   end
 
   test "store an error", %{instance: instance} do
-
-    assert length(instance.errors) > 0
+    with_error = ProcessInstance.register_error(instance, :start, "starting failed")
+    assert length(with_error.errors) > 0
   end
 
   test "collect step metrics", %{instance: instance} do

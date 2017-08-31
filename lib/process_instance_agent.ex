@@ -30,9 +30,9 @@ defmodule ProcessInstanceAgent do
     Agent.update(via_tuple(id), &ProcessInstance.next_step(&1))
   end
 
-  def register_error(step_id, id, message) do
+  def register_error(id, step_id, message) do
     IO.inspect(message)
-    %BPMTaskError{ step_id: step_id, instance_version: getVersion(id) , error_message: message}
+    Agent.update(via_tuple(id), &ProcessInstance.register_error(&1, step_id, message))
   end
 
   def child_spec(_args) do

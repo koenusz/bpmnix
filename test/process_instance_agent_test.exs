@@ -32,4 +32,9 @@ defmodule ProcessInstanceAgentTest do
     assert ProcessInstanceAgent.getHistory(1) == @history
   end
 
+  test "register_error" do
+    ProcessInstanceAgent.register_error(1, :task1, "task 1 failed")
+    assert ProcessInstanceAgent.get(1).errors > 1
+  end
+
 end
