@@ -37,4 +37,9 @@ defmodule ProcessInstanceAgentTest do
     assert ProcessInstanceAgent.get(1).errors > 1
   end
 
+  test "complete a process" do
+    ProcessInstanceAgent.complete(1)
+    assert ProcessInstanceAgent.get(1).completed? == true
+  end
+
 end

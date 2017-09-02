@@ -31,8 +31,11 @@ defmodule ProcessInstanceAgent do
   end
 
   def register_error(id, step_id, message) do
-    IO.inspect(message)
     Agent.update(via_tuple(id), &ProcessInstance.register_error(&1, step_id, message))
+  end
+
+  def complete(id) do
+    Agent.update(via_tuple(id), &ProcessInstance.complete(&1))
   end
 
   def child_spec(_args) do
