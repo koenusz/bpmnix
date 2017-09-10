@@ -44,7 +44,8 @@ defmodule Bpmnix.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [ {:credo, "~> 0.8", only: [:dev, :test], runtime: false} ]
+    [ {:sweet_xml, "~> 0.6.5"},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false} ]
   end
 
   defp aliases do

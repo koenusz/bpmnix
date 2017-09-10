@@ -19,12 +19,22 @@ defmodule ProcessEngineTest do
     instance = ProcessEngine.process_instance(engine)
 
     assert instance.id == 1
-    assert instance.status != [{:event, :start}]
+    refute instance.status == [{:event, :start}]
     assert (length instance.history) > 0
   end
 
-  test "recieve a ... event" do
+  test "Recieve a start event error case", %{engine: engine} do
 
+    :ok = ProcessEngine.event( engine, {:event, :thisgivesanerror})
+    Process.alive?(engine)
+    instance = ProcessEngine.process_instance(engine)
+
+    assert instance.id == 1
+    assert (length instance.errors) > 0
+  end
+
+  test "recieve a ... event" do
+    refute true
   end
 
   test "execute a task" do
@@ -35,12 +45,18 @@ defmodule ProcessEngineTest do
 
   end
 
-  test "recieve a stop event" do
+  test "execute the whole process", %{engine: engine} do
 
+    :ok = ProcessEngine.event( engine, {:event, :start})
+    instance = ProcessEngine.process_instance(engine)
+
+    assert instance.id == 1
+    assert instance.completed == true
+    assert (length instance.history) == 4
   end
 
   test "recover from crashing task execution" do
-
+    refute true
   end
 
 

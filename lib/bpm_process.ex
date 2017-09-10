@@ -1,4 +1,4 @@
-defmodule BPMProcess do
+defmodule   BPMProcess do
   @moduledoc """
   This module provides macro's for creating a process implementation.
 """

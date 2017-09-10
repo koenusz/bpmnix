@@ -21,8 +21,8 @@ defmodule Support.ProcessDefinition do
   end
 
   def add_start_and_stop_events(process) do
-    start = %BPMEvent{id: :start, name: "start"}
-    stop = %BPMEvent{id: :stop, name: "stop"}
+    start = %BPMEvent{id: :start, type: :startEvent, name: "start"}
+    stop = %BPMEvent{id: :stop, type: :endEvent, name: "stop"}
 
     process
     |> ProcessDefinition.add(start)
@@ -30,8 +30,8 @@ defmodule Support.ProcessDefinition do
   end
 
   def add_tasks(process) do
-    task = %BPMTask{id: :task1, name: "task 1"}
-    task2 = %BPMTask{id: :task2, name: "task 2"}
+    task = %BPMTask{id: :task1, type: :task, name: "task 1"}
+    task2 = %BPMTask{id: :task2, type: :task, name: "task 2"}
 
     process
     |> ProcessDefinition.add(task)
@@ -39,8 +39,8 @@ defmodule Support.ProcessDefinition do
   end
 
   def add_gateways(process) do
-    gateway = %BPMGateway{id: 1, name: "myGateway1"}
-    gateway2 = %BPMGateway{id: 2, name: "myGateway2"}
+    gateway = %BPMGateway{id: 1, type: :exclusiveGateway, name: "myGateway1"}
+    gateway2 = %BPMGateway{id: 2, type: :exclusiveGateway, name: "myGateway2"}
 
     process
     |> ProcessDefinition.add(gateway)

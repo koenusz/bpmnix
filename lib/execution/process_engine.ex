@@ -1,9 +1,6 @@
 defmodule ProcessEngine do
   use GenServer
 
-
-  defstruct auto_id: 1
-
   @moduledoc """
   An engine is responsible for facilitating interaction of a process instance
   with the outside world and executing the implementation steps.
@@ -32,6 +29,7 @@ defmodule ProcessEngine do
   @doc """
   Executes the implementation of a task with the associated task_id.
   """
+  #TODO probably the artgs need to go in favor of the instance data.
   def execute_task(implementation, task_id, args) do
     task = "task_" <> Atom.to_string(task_id)
            |> String.to_atom
@@ -62,13 +60,24 @@ defmodule ProcessEngine do
   """
 
   def next_step(process_id) do
-    ProcessInstanceAgent.next_step process_id
+    next_step = ProcessInstanceAgent.next_step process_id
+
+    for status <- next_step.status  do
+      case status do
+        {:event, event_Id} -> :ok
+        {:task, task_id} -> :ok
+      end
+    end
+
+
 
     #    case for task, event or gateway
     #    call the appropriate function
   end
 
-#  callbacks
+
+
+  #  callbacks
 
   def handle_cast({:event, event}, process_id) do
     present = ProcessInstanceAgent.getStatus(process_id)
@@ -77,8 +86,8 @@ defmodule ProcessEngine do
       next_step process_id
     else
       ProcessInstanceAgent.register_error(
-        event,
         process_id,
+        event,
         "Event #{event} not present in statuslist of process Instance #{process_id}"
       )
     end
