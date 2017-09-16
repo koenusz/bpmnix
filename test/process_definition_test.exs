@@ -20,7 +20,7 @@ import Support.ProcessDefinition
 
 
     test "add a task to a process", %{process: process} do
-      process = ProcessDefinition.add(process, %Definition.BPMTask{id: :task3, name: "the new task"})
+      process = ProcessDefinition.add(process, %Definition.BPMTask{id: :task3, type: :task, name: "the new task"})
       Map.keys(process.tasks)
          |> length
          |> (fn length -> length == 3  end).()
