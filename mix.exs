@@ -2,14 +2,16 @@ defmodule Bpmnix.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :bpmnix,
-     version: "0.1.0",
-     elixir: "~> 1.4",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     elixirc_paths: elixirc_paths(Mix.env),
-     aliases: aliases(),
-     deps: deps()]
+    [
+      app: :bpmnix,
+      version: "0.1.0",
+      elixir: "~> 1.4",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env),
+      aliases: aliases(),
+      deps: deps()
+    ]
   end
 
   # Configuration for the OTP application
@@ -17,9 +19,10 @@ defmodule Bpmnix.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger],
-    mod: {BPMnix, []}
-  ]
+    [
+      extra_applications: [:logger],
+      mod: {BPMnix, []}
+    ]
   end
 
   defp elixirc_paths :test do
@@ -44,13 +47,17 @@ defmodule Bpmnix.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [ {:sweet_xml, "~> 0.6.5"},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false} ]
+    [
+      {:sweet_xml, "~> 0.6.5"},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:mix_test_watch, "~> 0.3", only: :dev, runtime: false}
+    ]
   end
 
   defp aliases do
-  [
-    test: "test --no-start"
-  ]
+    [
+      test: "test --no-start",
+      watch: "test.watch --no-start --stale"
+    ]
   end
 end
