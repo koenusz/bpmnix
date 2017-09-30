@@ -33,4 +33,11 @@ defmodule ProcessImplementationTest do
              end) == "steps registered are ([{:decide}, {:start}, {:taskId}, {:mytestingId}])" <> "\n"
       end
 
+   test "get a process definition by its process Id" do
+     definition = Support.ProcessImplementation.definition
+     IO.inspect definition
+     assert definition.id == :Process_1
+
+   end
+
 end

@@ -2,13 +2,13 @@ defmodule ProcessEngineTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
 
-  import Support.ProcessDefinition
+  import Support.SimpleImplementation
 
   setup do
   start_supervised(ProcessInstanceSupervisor)
   start_supervised({Registry, [keys: :unique, name: :process_instance_registry]})
   start_supervised({ProcessEngineSupervisor, name: :process_engine_supervisor})
-  {:ok, engine} = ProcessEngineSupervisor.start_engine([1, simple_process()])
+  {:ok, engine} = ProcessEngineSupervisor.start_engine([1, Support.SimpleImplementation])
   {:ok, engine: engine}
   end
 #  When a user of the library fires up a start event, a new engine,
@@ -17,6 +17,7 @@ defmodule ProcessEngineTest do
 
     :ok = ProcessEngine.event( engine, {:event, :start})
     instance = ProcessEngine.process_instance(engine)
+    IO.inspect(instance)
 
     assert instance.id == 1
     refute instance.status == [{:event, :start}]
@@ -51,7 +52,7 @@ defmodule ProcessEngineTest do
     instance = ProcessEngine.process_instance(engine)
 
     assert instance.id == 1
-    assert instance.completed == true
+    assert instance.completed? == true
     assert (length instance.history) == 4
   end
 

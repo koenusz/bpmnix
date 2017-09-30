@@ -20,16 +20,15 @@ defmodule ProcessEngine do
   @doc """
   Starts the engine.
   """
-  #  TODO definition should be changed to definition_id
-  def start_link(process_id, %ProcessDefinition{} = process_definition) do
-    {:ok, _pid} = ProcessInstanceSupervisor.start_process([process_id, process_definition])
+  def start_link(process_id, process_implementation) do
+    {:ok, _pid} = ProcessInstanceSupervisor.start_process([process_id, process_implementation])
     GenServer.start_link(__MODULE__, process_id)
   end
 
   @doc """
   Executes the implementation of a task with the associated task_id.
   """
-  #TODO probably the artgs need to go in favor of the instance data.
+  #TODO get the implemetation from the state.
   def execute_task(implementation, task_id, args) do
     task = "task_" <> Atom.to_string(task_id)
            |> String.to_atom
@@ -60,10 +59,10 @@ defmodule ProcessEngine do
   """
 
   def next_step(process_id) do
-    next_step = ProcessInstanceAgent.next_step process_id
-
-    for status <- next_step.status  do
-      case status do
+    :ok = ProcessInstanceAgent.next_step process_id
+    status = ProcessInstanceAgent.getStatus process_id
+    for state <- status  do
+      case state do
         {:event, event_Id} -> :ok
         {:task, task_id} -> :ok
       end

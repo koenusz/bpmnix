@@ -1,5 +1,5 @@
 defmodule Support.ProcessImplementation do
-        use BPMProcess
+        use BPMProcess, "test/resources"
   @moduledoc false
 
     step({:task, :mytestingId}) do

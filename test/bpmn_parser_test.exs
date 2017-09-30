@@ -7,7 +7,7 @@ defmodule BPMNParserTest do
   require Logger
   alias Definition.BPMEvent
 
-  @file_location Path.expand("./test/simple_gateway.bpmn")
+  @file_location Path.expand("./test/resources/simple_gateway.bpmn")
   @incorrect_file_location Path.expand("./notThere.bpmn")
 
 

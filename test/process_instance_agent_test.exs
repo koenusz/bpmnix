@@ -5,13 +5,13 @@ defmodule ProcessInstanceAgentTest do
 
   @history [%{data: %{}, version: %{branch: 0, update: 0}, status: [event: :start]}]
 
-  import Support.ProcessDefinition
+  import Support.SimpleImplementation
 
   setup do
     start_supervised(ProcessInstanceSupervisor)
     start_supervised({Registry, [keys: :unique, name: :process_instance_registry]})
 
-     ProcessInstanceSupervisor.start_process [1, simple_process()]
+     ProcessInstanceSupervisor.start_process [1, Support.SimpleImplementation]
       :ok
   end
 

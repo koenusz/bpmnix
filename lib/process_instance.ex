@@ -13,7 +13,7 @@ defmodule ProcessInstance do
 
   """
 
-  @enforce_keys [:id, :process_definition, :data]
+  @enforce_keys [:id, :process_implementation, :data]
   defstruct id: nil,
             version: %{
               update: 0,
@@ -22,7 +22,7 @@ defmodule ProcessInstance do
             history: [],
             status: [{:event, :start}],
             data: %{},
-            process_definition: nil,
+            process_implementation: nil,
             errors: [],
             completed?: false
 
@@ -30,17 +30,16 @@ defmodule ProcessInstance do
   @doc """
   Creates a new instance for this process definition.
   """
-  def new_instance(id, definition, data \\ %{}) do
-    %ProcessInstance{id: id, process_definition: definition, data: data}
+  def new_instance(id, implementation, data \\ %{}) do
+    %ProcessInstance{id: id, process_implementation: implementation, data: data}
   end
 
   @doc """
   Determines the next step for this instance and updates the status and the history.
   """
   def next_step(instance) do
-    next_status = ProcessDefinition.next_step instance.process_definition, instance.status
+    next_status = ProcessDefinition.next_step instance.process_implementation.definition, instance.status
     %{instance | status: next_status, history: update_history(instance), version: version_update(instance)}
-
   end
 
   @doc """
