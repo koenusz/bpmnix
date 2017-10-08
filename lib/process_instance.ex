@@ -34,12 +34,18 @@ defmodule ProcessInstance do
     %ProcessInstance{id: id, process_implementation: implementation, data: data}
   end
 
+
+
   @doc """
   Determines the next step for this instance and updates the status and the history.
   """
-  def next_step(instance) do
-    next_status = ProcessDefinition.next_step instance.process_implementation.definition, instance.status
-    %{instance | status: next_status, history: update_history(instance), version: version_update(instance)}
+  def complete_step(instance, step) do
+    next_step = ProcessDefinition.next_step instance.process_implementation.definition, step
+    new_status = instance.status
+    |> List.delete(step)
+    |> Kernel.++(next_step)
+
+    %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
   end
 
   @doc """
@@ -79,8 +85,6 @@ defmodule ProcessInstance do
   The history of the instance will not be deleted. A rewind creates its own history update.
   """
   def rewind(instance, to_version) do
-
-
     case history_item(instance.history, to_version) do
       {:ok, %{data: data, status: _, version: _}} ->
         %{

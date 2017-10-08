@@ -40,8 +40,6 @@ alias Definition.BPMGateway
     assert length(task1.outgoing) == 1
     assert List.first(task2.incoming).id == 1
 
-    IO.inspect(process)
-
   end
 
   test "link a task and an event",  %{process: process} do

@@ -1,5 +1,7 @@
 defmodule ProcessInstanceAgentTest do
   use ExUnit.Case, async: false
+  import ExUnit.CaptureIO
+
 
   @moduledoc false
 
@@ -24,10 +26,20 @@ defmodule ProcessInstanceAgentTest do
 
   end
 
+  test "get a next step" do
+    assert ProcessInstanceAgent.next_step(1, {:event, :start}) == [{:task, :task1}]
+  end
+
+  test "execute a task" do
+    assert capture_io(fn ->
+            ProcessInstanceAgent.execute_step(1,{:event, :start})
+           end) == "starting the process" <> "\n"
+  end
+
   test "take a step in the process" do
 
     assert ProcessInstanceAgent.get(1).id == 1
-    ProcessInstanceAgent.next_step(1)
+    ProcessInstanceAgent.complete_step(1, {:event, :start})
     assert ProcessInstanceAgent.getStatus(1) == [{:task, :task1}]
     assert ProcessInstanceAgent.getHistory(1) == @history
   end

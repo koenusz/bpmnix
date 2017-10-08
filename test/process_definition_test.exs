@@ -10,11 +10,11 @@ import Support.ProcessDefinition
 
 
     test "step through the process", %{process: process} do
-      newstatus = ProcessDefinition.next_step(process, [{:event, :start}])
+      newstatus = ProcessDefinition.next_step(process, {:event, :start})
       assert newstatus == [{:task, :task1}]
-      newstatus = ProcessDefinition.next_step(process, [{:task, :task1}])
+      newstatus = ProcessDefinition.next_step(process, {:task, :task1})
       assert newstatus == [{:task, :task2}]
-      newstatus = ProcessDefinition.next_step(process, [{:task, :task2}])
+      newstatus = ProcessDefinition.next_step(process, {:task, :task2})
       assert newstatus == [{:event, :stop}]
     end
 

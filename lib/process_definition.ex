@@ -18,14 +18,15 @@ defmodule ProcessDefinition do
 
 
   @doc """
-    Updates the process to go to the next step.
+    Returns a list of the next steps in the process definition.
   """
-  def next_step(%__MODULE__{} = process, status) do
+  def next_step(%__MODULE__{} = process_definition, step_type_id) do
 
-    Enum.map(status, &get(process, &1))    #get att the current steps
-    |> Keyword.get_values(:ok)
-    |> Enum.flat_map(fn step -> step.outgoing  end)       #collect all the outgoinng sequenceflows from all the steps
-    |> Enum.map(fn outgoing -> outgoing.target  end)      #get the targets.
+
+    get(process_definition, step_type_id)
+    |> fn {:ok, step } -> step end.()
+    |> fn step -> step.outgoing  end.()       #collect all the outgoinng sequenceflows from all the steps
+    |> Enum.map(fn outgoing -> outgoing.target  end) #get the targets.
   end
 
 

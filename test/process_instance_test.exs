@@ -32,7 +32,7 @@ defmodule ProcessInstanceTest do
   end
 
   test "go to the next step", %{instance: instance} do
-    nextInstance = ProcessInstance.next_step(instance)
+    nextInstance = ProcessInstance.complete_step(instance, {:event, :start})
     assert nextInstance.status == [task: :task1]
     assert nextInstance.history == @first_step_history_with_data
     assert nextInstance.version == %{update: 1, branch: 0}
@@ -71,7 +71,7 @@ defmodule ProcessInstanceTest do
 
   test "rewind to a previous step and start a new branch", %{instance: instance} do
     with_new_data = ProcessInstance.update_data(instance, %{name: "updated"})
-    nextInstance = ProcessInstance.next_step(with_new_data)
+    nextInstance = ProcessInstance.complete_step(with_new_data, {:event, :start})
     rewound = ProcessInstance.rewind(nextInstance, %{update: 0, branch: 0})
 
     assert nextInstance.version == %{update: 2, branch: 0}
@@ -83,7 +83,7 @@ defmodule ProcessInstanceTest do
 
   test "rewind fails due to version unknown", %{instance: instance} do
     with_new_data = ProcessInstance.update_data(instance, %{name: "updated"})
-    nextInstance = ProcessInstance.next_step(with_new_data)
+    nextInstance = ProcessInstance.complete_step(with_new_data, {:event, :start})
 
     assert nextInstance.version == %{update: 2, branch: 0}
     assert nextInstance.data == %{name: "updated"}

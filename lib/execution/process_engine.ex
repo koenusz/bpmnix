@@ -1,6 +1,8 @@
 defmodule ProcessEngine do
   use GenServer
 
+  import Logger
+
   @moduledoc """
   An engine is responsible for facilitating interaction of a process instance
   with the outside world and executing the implementation steps.
@@ -18,22 +20,14 @@ defmodule ProcessEngine do
 
 
   @doc """
-  Starts the engine.
+  Starts the engine. The state of the genserver is the process id.
   """
   def start_link(process_id, process_implementation) do
     {:ok, _pid} = ProcessInstanceSupervisor.start_process([process_id, process_implementation])
     GenServer.start_link(__MODULE__, process_id)
   end
 
-  @doc """
-  Executes the implementation of a task with the associated task_id.
-  """
-  #TODO get the implemetation from the state.
-  def execute_task(implementation, task_id, args) do
-    task = "task_" <> Atom.to_string(task_id)
-           |> String.to_atom
-    apply(implementation, task, args)
-  end
+
 
   @doc """
   This function retrieves the current state of the process instance.
@@ -41,57 +35,45 @@ defmodule ProcessEngine do
   During execution this is the safest way of retrieving state, this call
   prevents race conditions that are possible when adressing the ProcessInstanceAgent directly.
   """
-  def process_instance(pid) do
-    GenServer.call(pid, :instance)
+  def process_instance(engine_pid) do
+    GenServer.call(engine_pid, :instance)
   end
 
 
   @doc """
-  Recieves events targeted at the
+  Execute a step.
   """
-  def event(pid, event) do
-    GenServer.cast(pid, event)
+  def execute_step(engine_pid, step_type_id) do
+    GenServer.cast(engine_pid, {:execute, step_type_id})
   end
 
-  @doc """
-  First call the process instance agent to determine the next step(s) in the process,
-  then call self to execute these steps.
-  """
-
-  def next_step(process_id) do
-    :ok = ProcessInstanceAgent.next_step process_id
-    status = ProcessInstanceAgent.getStatus process_id
-    for state <- status  do
-      case state do
-        {:event, event_Id} -> :ok
-        {:task, task_id} -> :ok
-      end
-    end
-
-
-
-    #    case for task, event or gateway
-    #    call the appropriate function
+  def complete_step(engine_pid, step_type_id) do
+    GenServer.cast(engine_pid, {:complete, step_type_id})
   end
-
 
 
   #  callbacks
+  #handle the task response
+  def handle_info(msg, {process_id, executing}) do
+    Logger.debug "received #{inspect msg}"
+  end
 
-  def handle_cast({:event, event}, process_id) do
-    present = ProcessInstanceAgent.getStatus(process_id)
-              |> Enum.member?({:event, event})
-    if present do
-      next_step process_id
-    else
-      ProcessInstanceAgent.register_error(
-        process_id,
-        event,
-        "Event #{event} not present in statuslist of process Instance #{process_id}"
-      )
-    end
 
-    {:noreply, process_id}
+  def handle_cast({:complete, step_type_id}, state) do
+    ProcessInstanceAgent.complete_step(state, step_type_id)
+    ProcessInstanceAgent.next_step(state, step_type_id)
+    |> IO.inspect
+    |> fn next -> execute_step self(), next  end.()
+    {:noreply, state}
+  end
+
+  def handle_cast({:execute, step_type_id}, state) do
+    ProcessInstanceAgent.execute_step(state, step_type_id)
+    |> case do
+         :ok -> complete_step(self, step_type_id)
+         :error -> GenServer.stop(self, :execution_error)
+       end
+    {:noreply, state}
   end
 
   def handle_call(:instance, _from, process_id) do

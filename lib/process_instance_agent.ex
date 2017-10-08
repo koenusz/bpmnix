@@ -14,6 +14,10 @@ defmodule ProcessInstanceAgent do
     Agent.get(via_tuple(id), fn instance -> instance  end)
   end
 
+  def getImplementation(id) do
+    Agent.get(via_tuple(id), fn instance -> instance.process_implementation  end)
+  end
+
   def getStatus(id) do
     Agent.get(via_tuple(id), fn instance -> instance.status  end)
   end
@@ -26,8 +30,30 @@ defmodule ProcessInstanceAgent do
     Agent.get(via_tuple(id), fn instance -> instance.version  end)
   end
 
-  def next_step(id) do
-    Agent.update(via_tuple(id), &ProcessInstance.next_step(&1))
+  def next_step(id, step) do
+    Agent.get(
+      via_tuple(id),
+      fn instance ->
+        ProcessDefinition.next_step instance.process_implementation.definition, step
+      end
+    )
+  end
+
+  def execute_step(id, {type, step_id}) do
+
+    step_implementation_function = Atom.to_string(type) <> "_" <> Atom.to_string(step_id)
+                                   |> String.to_atom
+
+    Task.async(getImplementation(id), step_implementation_function, [])
+    |> Task.await
+    |> case do
+         :ok -> :ok
+         {:error, message} -> register_error(id, step_id, message)
+       end
+  end
+
+  def complete_step(id, step_type_id) do
+    Agent.update(via_tuple(id), &ProcessInstance.complete_step(&1, step_type_id))
   end
 
   def register_error(id, step_id, message) do
@@ -39,10 +65,12 @@ defmodule ProcessInstanceAgent do
   end
 
   def child_spec(_args) do
-    %{id: __MODULE__,
+    %{
+      id: __MODULE__,
       start: {__MODULE__, :start_link, []},
       restart: :permanent,
-      type: :worker}
+      type: :worker
+    }
   end
 
   defp via_tuple (process_id) do

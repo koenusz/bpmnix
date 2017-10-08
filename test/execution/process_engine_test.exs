@@ -15,10 +15,10 @@ defmodule ProcessEngineTest do
 #  and process instance should be started with the approprate definition.
   test "Recieve a start event", %{engine: engine} do
 
-    :ok = ProcessEngine.event( engine, {:event, :start})
+    ProcessEngine.execute_step( engine, {:event, :start})
+    |> IO.inspect
     instance = ProcessEngine.process_instance(engine)
-    IO.inspect(instance)
-
+    |> IO.inspect
     assert instance.id == 1
     refute instance.status == [{:event, :start}]
     assert (length instance.history) > 0
@@ -36,14 +36,6 @@ defmodule ProcessEngineTest do
 
   test "recieve a ... event" do
     refute true
-  end
-
-  test "execute a task" do
-
-    assert capture_io(fn ->
-             ProcessEngine.execute_task(Support.ProcessImplementation, :taskId, [])
-             end) == "testing this task" <> "\n"
-
   end
 
   test "execute the whole process", %{engine: engine} do
