@@ -1,6 +1,7 @@
 defmodule ProcessEngineTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
+  require Logger
 
   import Support.SimpleImplementation
 
@@ -15,10 +16,8 @@ defmodule ProcessEngineTest do
 #  and process instance should be started with the approprate definition.
   test "Recieve a start event", %{engine: engine} do
 
-    ProcessEngine.execute_step( engine, {:event, :start})
-    |> IO.inspect
-    instance = ProcessEngine.process_instance(engine)
-    |> IO.inspect
+    ProcessEngine.execute_steps( engine, [{:event, :start}])
+    instance = wait_for_history(engine)
     assert instance.id == 1
     refute instance.status == [{:event, :start}]
     assert (length instance.history) > 0
@@ -26,7 +25,7 @@ defmodule ProcessEngineTest do
 
   test "Recieve a start event error case", %{engine: engine} do
 
-    :ok = ProcessEngine.event( engine, {:event, :thisgivesanerror})
+    :ok = ProcessEngine.execute_steps( engine, [{:event, :thisgivesanerror}])
     Process.alive?(engine)
     instance = ProcessEngine.process_instance(engine)
 
@@ -40,8 +39,8 @@ defmodule ProcessEngineTest do
 
   test "execute the whole process", %{engine: engine} do
 
-    :ok = ProcessEngine.event( engine, {:event, :start})
-    instance = ProcessEngine.process_instance(engine)
+    [:ok] = ProcessEngine.execute_steps( engine, [{:event, :start}])
+    instance = wait_for_history(engine)
 
     assert instance.id == 1
     assert instance.completed? == true
@@ -50,6 +49,17 @@ defmodule ProcessEngineTest do
 
   test "recover from crashing task execution" do
     refute true
+  end
+
+  #waits until the first step is completed
+  defp wait_for_history(engine) do
+    instance = ProcessEngine.process_instance(engine)
+    case instance.history do
+      [h|t] -> instance
+      [] ->
+        :timer.sleep(100)
+        wait_for_history(engine)
+    end
   end
 
 

@@ -1,5 +1,7 @@
 defmodule ProcessInstance do
 
+  require Logger
+
   @moduledoc"""
     Represent an instance of the process definition.
 
@@ -40,12 +42,15 @@ defmodule ProcessInstance do
   Determines the next step for this instance and updates the status and the history.
   """
   def complete_step(instance, step) do
+    Logger.debug("Instance #{inspect instance}, completing step")
     next_step = ProcessDefinition.next_step instance.process_implementation.definition, step
+    |> IO.inspect
     new_status = instance.status
     |> List.delete(step)
     |> Kernel.++(next_step)
 
     %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
+
   end
 
   @doc """

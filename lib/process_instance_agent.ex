@@ -1,5 +1,7 @@
 defmodule ProcessInstanceAgent do
   use Agent
+  require Logger
+
   @moduledoc """
     This module is a wrapping agent around the process instance functional datastructure.
   """
@@ -53,6 +55,7 @@ defmodule ProcessInstanceAgent do
   end
 
   def complete_step(id, step_type_id) do
+    Logger.debug("Agent completing #{inspect step_type_id}")
     Agent.update(via_tuple(id), &ProcessInstance.complete_step(&1, step_type_id))
   end
 

@@ -43,8 +43,10 @@ defmodule ProcessEngine do
   @doc """
   Execute a step.
   """
-  def execute_step(engine_pid, step_type_id) do
-    GenServer.cast(engine_pid, {:execute, step_type_id})
+  def execute_steps(engine_pid, step_type_ids) do
+    for step_type_id <- step_type_ids do
+      GenServer.cast(engine_pid, {:execute, step_type_id})
+    end
   end
 
   def complete_step(engine_pid, step_type_id) do
@@ -60,14 +62,15 @@ defmodule ProcessEngine do
 
 
   def handle_cast({:complete, step_type_id}, state) do
+    Logger.debug("completing #{inspect step_type_id}")
     ProcessInstanceAgent.complete_step(state, step_type_id)
     ProcessInstanceAgent.next_step(state, step_type_id)
-    |> IO.inspect
-    |> fn next -> execute_step self(), next  end.()
+    |> fn next -> execute_steps self(), next  end.()
     {:noreply, state}
   end
 
   def handle_cast({:execute, step_type_id}, state) do
+    Logger.debug("executing #{inspect step_type_id}")
     ProcessInstanceAgent.execute_step(state, step_type_id)
     |> case do
          :ok -> complete_step(self, step_type_id)

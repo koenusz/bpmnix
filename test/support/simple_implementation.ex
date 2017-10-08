@@ -4,20 +4,20 @@ defmodule Support.SimpleImplementation do
 
 
   task(:task1) do
-    IO.puts("testing task 1")
+    IO.puts("Support.SimpleImplementation: testing task 1")
   end
 
   task(:task2) do
-    IO.puts("testing task 2")
+    IO.puts("Support.SimpleImplementation: testing task 2")
   end
 
 
   event(:start) do
-    IO.puts("starting the process")
+    IO.puts("Support.SimpleImplementation: starting the process")
   end
 
   event(:stop) do
-    IO.puts("stopping the process")
+    IO.puts("Support.SimpleImplementation: stopping the process")
   end
 
   def definition() do
