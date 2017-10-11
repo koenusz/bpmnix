@@ -57,24 +57,31 @@ defmodule ProcessEngine do
   #  callbacks
   #handle the task response
   def handle_info(msg, {process_id, executing}) do
-    Logger.debug "received #{inspect msg}"
+    Logger.debug "Engine: received #{inspect msg}"
   end
 
 
   def handle_cast({:complete, step_type_id}, state) do
-    Logger.debug("completing #{inspect step_type_id}")
+    Logger.debug("Engine: completing #{inspect step_type_id}")
     ProcessInstanceAgent.complete_step(state, step_type_id)
-    ProcessInstanceAgent.next_step(state, step_type_id)
-    |> fn next -> execute_steps self(), next  end.()
+    if ProcessInstanceAgent.end_event?(state, step_type_id) do
+      ProcessInstanceAgent.complete(state)
+      #TODO perhaps stopping directly will cause issues
+      Logger.debug("Engine: detected end event, stopping engine")
+#      GenServer.stop(self())
+    else
+      ProcessInstanceAgent.next_step(state, step_type_id)
+      |> fn next -> execute_steps self(), next  end.()
+    end
     {:noreply, state}
   end
 
   def handle_cast({:execute, step_type_id}, state) do
-    Logger.debug("executing #{inspect step_type_id}")
+    Logger.debug("Engine: executing #{inspect step_type_id}")
     ProcessInstanceAgent.execute_step(state, step_type_id)
     |> case do
-         :ok -> complete_step(self, step_type_id)
-         :error -> GenServer.stop(self, :execution_error)
+         :ok -> complete_step(self(), step_type_id)
+         :error -> GenServer.stop(self(), :execution_error)
        end
     {:noreply, state}
   end

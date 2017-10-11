@@ -24,12 +24,21 @@ defmodule ProcessDefinition do
 
 
     get(process_definition, step_type_id)
-    |> fn {:ok, step } -> step end.()
+    |> fn {:ok, step} -> step end.()
     |> fn step -> step.outgoing  end.()       #collect all the outgoinng sequenceflows from all the steps
     |> Enum.map(fn outgoing -> outgoing.target  end) #get the targets.
   end
 
+  @doc """
+  Checks if there is an event in the process definition, and if that event is of type :endEvent returns true else false.
+  """
 
+  def end_event?(%__MODULE__{} = process_definition, event_type_id) do
+    case get(process_definition, event_type_id) do
+      {:ok, event} -> event.type == :endEvent
+      _ -> false
+    end
+  end
 
 
   @doc """

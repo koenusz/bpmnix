@@ -1,8 +1,6 @@
 defmodule ProcessInstanceTest do
   use ExUnit.Case, async: true
 
-  import Support.SimpleImplementation
-
   @first_step_history_with_data [
     %{
       data: %{
@@ -14,6 +12,33 @@ defmodule ProcessInstanceTest do
       version: %{
         update: 0,
         branch: 0
+      }
+    }
+  ]
+
+  @second_step_with_data [
+    %{
+      data: %{
+        name: "start_data"
+      },
+      status: [
+        task: :task1
+      ],
+      version: %{
+        branch: 0,
+        update: 1
+      }
+    },
+    %{
+      data: %{
+        name: "start_data"
+      },
+      status: [
+        event: :start
+      ],
+      version: %{
+        branch: 0,
+        update: 0
       }
     }
   ]
@@ -36,6 +61,16 @@ defmodule ProcessInstanceTest do
     assert nextInstance.status == [task: :task1]
     assert nextInstance.history == @first_step_history_with_data
     assert nextInstance.version == %{update: 1, branch: 0}
+  end
+
+  test "complete 2 steps", %{instance: instance} do
+    nextInstance = ProcessInstance.complete_step(instance, {:event, :start})
+    assert nextInstance.status == [task: :task1]
+    step2 = ProcessInstance.complete_step(nextInstance, {:task, :task1})
+
+    assert step2.status == [task: :task2]
+    assert step2.history == @second_step_with_data
+    assert step2.version == %{update: 2, branch: 0}
   end
 
   test "add data to an instance" do
@@ -64,10 +99,10 @@ defmodule ProcessInstanceTest do
     assert length(with_error.errors) > 0
   end
 
-  test "collect step metrics", %{instance: instance} do
-    #    TODO waiting on Phoenix 1.4 apm implementation
-    #    assert instance.task.endtime > 0
-  end
+  #  test "collect step metrics", %{instance: instance} do
+  #    #    TODO waiting on Phoenix 1.4 apm implementation
+  #    #    assert instance.task.endtime > 0
+  #  end
 
   test "rewind to a previous step and start a new branch", %{instance: instance} do
     with_new_data = ProcessInstance.update_data(instance, %{name: "updated"})

@@ -33,7 +33,7 @@ defmodule ProcessInstanceAgentTest do
   test "execute a task" do
     assert capture_io(fn ->
             ProcessInstanceAgent.execute_step(1,{:event, :start})
-           end) == "starting the process" <> "\n"
+           end) == "Support.SimpleImplementation: starting the process" <> "\n"
   end
 
   test "take a step in the process" do

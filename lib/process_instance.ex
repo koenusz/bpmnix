@@ -42,15 +42,16 @@ defmodule ProcessInstance do
   Determines the next step for this instance and updates the status and the history.
   """
   def complete_step(instance, step) do
-    Logger.debug("Instance #{inspect instance}, completing step")
-    next_step = ProcessDefinition.next_step instance.process_implementation.definition, step
-    |> IO.inspect
-    new_status = instance.status
-    |> List.delete(step)
-    |> Kernel.++(next_step)
+    if(Enum.member?(instance.status, step)) do
+      next_step = ProcessDefinition.next_step instance.process_implementation.definition, step
+      new_status = instance.status
+                   |> List.delete(step)
+                   |> Kernel.++(next_step)
 
-    %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
-
+      %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
+    else
+      {:error, "Instance Status #{inspect instance.status} does not contain #{inspect step}"}
+    end
   end
 
   @doc """
@@ -65,9 +66,9 @@ defmodule ProcessInstance do
   @doc """
   Stores an error that occured in the system on the process instance.
   """
-  def register_error(instance, step_id,  message) do
-    %BPMTaskError{ step_id: step_id, instance_version: instance.version  , error_message: message}
-    |> fn error ->  [error] ++ instance.errors end.()
+  def register_error(instance, step_id, message) do
+    %BPMTaskError{step_id: step_id, instance_version: instance.version, error_message: message}
+    |> fn error -> [error] ++ instance.errors end.()
     |> fn errors -> %{instance | errors: errors} end.()
 
   end
@@ -77,7 +78,8 @@ defmodule ProcessInstance do
   """
   #  TODO: probably send the instance to permanent storage.
   def complete(instance) do
-    %{instance | history: update_history(instance), completed?: true}
+    %{instance | completed?: true}
+
   end
 
 
@@ -99,7 +101,7 @@ defmodule ProcessInstance do
           history: update_history(instance),
           version: version_new_branch(instance)
         }
-        {:error, message} ->  {:error, message}
+      {:error, message} -> {:error, message}
     end
   end
 
@@ -108,19 +110,19 @@ defmodule ProcessInstance do
   """
   def history_item(history, version) do
     filtered = history
-    |> Enum.filter(fn history -> history.version == version end)
+               |> Enum.filter(fn history -> history.version == version end)
 
     case length(filtered) do
-    x when x > 1 -> {:error, "multiple history items in history for version #{inspect version}"}
-    x when x == 0 -> {:error, "no history items for version #{inspect version}"}
-    x when x == 1 -> {:ok, Enum.at(filtered, 0)}
+      x when x > 1 -> {:error, "multiple history items in history for version #{inspect version}"}
+      x when x == 0 -> {:error, "no history items for version #{inspect version}"}
+      x when x == 1 -> {:ok, Enum.at(filtered, 0)}
     end
   end
 
   defp update_history(instance) do
     new_entry = %{
       version: instance.version,
-      status: [{:event, :start}],
+      status: instance.status,
       data: instance.data
     }
     [new_entry | instance.history]

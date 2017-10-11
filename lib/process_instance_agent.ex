@@ -41,6 +41,17 @@ defmodule ProcessInstanceAgent do
     )
   end
 
+
+  @doc """
+    Checks if there is an event in the process definition of the process instance contained in this agent
+    , and if that event is of type :endEvent returns true else false.
+  """
+  def end_event?(id, event_type_id) do
+    getImplementation(id).definition
+    |> ProcessDefinition.end_event?(event_type_id)
+
+  end
+
   def execute_step(id, {type, step_id}) do
 
     step_implementation_function = Atom.to_string(type) <> "_" <> Atom.to_string(step_id)
@@ -55,7 +66,6 @@ defmodule ProcessInstanceAgent do
   end
 
   def complete_step(id, step_type_id) do
-    Logger.debug("Agent completing #{inspect step_type_id}")
     Agent.update(via_tuple(id), &ProcessInstance.complete_step(&1, step_type_id))
   end
 
