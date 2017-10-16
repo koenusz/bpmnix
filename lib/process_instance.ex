@@ -54,6 +54,10 @@ defmodule ProcessInstance do
     end
   end
 
+  def gateway_open?(instance, {gateway}) do
+    
+  end
+
   @doc """
   Updates the data map in the data field, adds a new history item and increases
   the update in the version by 1.
@@ -81,8 +85,7 @@ defmodule ProcessInstance do
     %{instance | completed?: true}
 
   end
-
-
+  
   @doc """
   Rewinds the instance to the state the instance was in when it had the specified version.
   It will not recieve the specified version as new version. Rather it will set the update to 0

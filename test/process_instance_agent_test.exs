@@ -1,6 +1,7 @@
 defmodule ProcessInstanceAgentTest do
   use ExUnit.Case, async: false
   import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
 
 
   @moduledoc false
@@ -30,10 +31,22 @@ defmodule ProcessInstanceAgentTest do
     assert ProcessInstanceAgent.next_step(1, {:event, :start}) == [{:task, :task1}]
   end
 
-  test "execute a task" do
+  test "execute an event" do
     assert capture_io(fn ->
             ProcessInstanceAgent.execute_step(1,{:event, :start})
            end) == "Support.SimpleImplementation: starting the process" <> "\n"
+  end
+
+  test "execute a default task" do
+    assert capture_log(fn ->
+             ProcessInstanceAgent.execute_step(1,{:event, :non_existing})
+           end) =~ "Missing implementation for task"
+  end
+
+  test "execute a timer event" do
+    assert capture_io(fn ->
+             ProcessInstanceAgent.execute_step(1,{:event, :timer})
+           end) == "done waiting 1000 ms" <> "\n"
   end
 
   test "take a step in the process" do
