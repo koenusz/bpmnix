@@ -66,9 +66,7 @@ defmodule ProcessEngine do
     ProcessInstanceAgent.complete_step(state, step_type_id)
     if ProcessInstanceAgent.end_event?(state, step_type_id) do
       ProcessInstanceAgent.complete(state)
-      #TODO perhaps stopping directly will cause issues
       Logger.debug("Engine: detected end event, stopping engine")
-#      GenServer.stop(self())
     else
       ProcessInstanceAgent.next_step(state, step_type_id)
       |> fn next -> execute_steps self(), next  end.()

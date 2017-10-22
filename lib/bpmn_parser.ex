@@ -12,7 +12,7 @@ defmodule BPMNParser do
   alias Definition.BPMTask
   alias Definition.BPMGateway
 
-  @event_types [:startEvent, :endEvent]
+  @event_types [:startEvent, :endEvent, :intermediateCatchEvent]
   @gateway_types [:exclusiveGateway]
   @task_types [:task]
 
@@ -187,14 +187,15 @@ defmodule BPMNParser do
   end
 
   defp get_step_type(steps, id) do
-    [step] = steps
-             |> Enum.filter(fn step -> step.id == id end)
-
-    case step do
-      %BPMEvent{} -> :event
-      %BPMGateway{} -> :gateway
-      %BPMTask{} -> :task
+    case Enum.filter(steps, fn step -> step.id == id end) do
+      [step] -> step
+      [] -> IO.warn("The type for #{inspect id} is not defined in the parser", Macro.Env.stacktrace(__ENV__))
     end
+    |> case do
+         %BPMEvent{} -> :event
+         %BPMGateway{} -> :gateway
+         %BPMTask{} -> :task
+       end
   end
 
 

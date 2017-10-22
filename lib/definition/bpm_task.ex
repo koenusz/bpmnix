@@ -1,6 +1,6 @@
 defmodule Definition.BPMTask do
 
-  import Logger
+  require Logger
 
   @moduledoc """
     This module represents a BPM Task.

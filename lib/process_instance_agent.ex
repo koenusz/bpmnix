@@ -47,16 +47,19 @@ defmodule ProcessInstanceAgent do
     , and if that event is of type :endEvent returns true else false.
   """
   def end_event?(id, event_type_id) do
-    getImplementation(id).definition
-    |> ProcessDefinition.end_event?(event_type_id)
-
+    end_event? = getImplementation(id).definition
+                 |> ProcessDefinition.end_event?(event_type_id)
+    if end_event? && getStatus(id) == [] do
+      complete(id)
+    end
   end
 
   def execute_step(id, {type, step_id}) do
 
-    step_implementation_function = Atom.to_string(type) <> "_" <> Atom.to_string(step_id)
-                                   |> String.to_atom
 
+    step_implementation_function =
+      Atom.to_string(type) <> "_" <> Atom.to_string(step_id)
+      |> String.to_atom
 
     if Keyword.has_key?(getImplementation(id).__info__(:functions), step_implementation_function) do
 
@@ -67,7 +70,12 @@ defmodule ProcessInstanceAgent do
            {:error, message} -> register_error(id, step_id, message)
          end
     else
-      Definition.BPMTask.default(step_id)
+      case type do
+        :task -> Definition.BPMTask.default(step_id)
+        :event -> Definition.BPMEvent.default(step_id)
+        :gateway -> Definition.BPMGateway.default(step_id)
+      end
+
     end
 
 

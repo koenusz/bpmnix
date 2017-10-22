@@ -149,7 +149,6 @@ defmodule ProcessDefinition do
   Gets a gateway from the `process` by `id`.
   """
   def get(_process, unknown) do
-    IO.inspect(unknown)
     {:error, :unknown}
   end
 

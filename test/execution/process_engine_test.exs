@@ -42,7 +42,6 @@ defmodule ProcessEngineTest do
 
     assert instance.id == 1
     assert instance.completed? == true
-    IO.inspect(instance.history)
     assert (length instance.history) == 4
   end
 
