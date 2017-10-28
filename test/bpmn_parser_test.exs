@@ -31,7 +31,7 @@ defmodule BPMNParserTest do
 
   test "get the start events", %{doc: doc} do
     assert BPMNParser.start_events(doc) == [
-             %BPMEvent{id: :StartEvent_1, type: :startEvent, name: "Start", outgoing: []}
+             %BPMEvent{id: :start, type: :startEvent, name: "Start", outgoing: []}
            ]
   end
 
@@ -44,7 +44,7 @@ defmodule BPMNParserTest do
 
   test "get the events", %{doc: doc} do
     assert BPMNParser.events(doc) == [
-             %Definition.BPMEvent{id: :StartEvent_1, incoming: [], name: "Start", outgoing: [], type: :startEvent},
+             %Definition.BPMEvent{id: :start, incoming: [], name: "Start", outgoing: [], type: :startEvent},
              %Definition.BPMEvent{id: :EndEvent_019ow9h, incoming: [], name: nil, outgoing: [], type: :endEvent},
              %Definition.BPMEvent{id: :EndEvent_1hwhq9d, incoming: [], name: nil, outgoing: [], type: :endEvent}
            ]
@@ -53,21 +53,21 @@ defmodule BPMNParserTest do
   test "get a list of tasks", %{doc: doc} do
     assert BPMNParser.tasks(doc) == [
              %Definition.BPMTask{
-               id: :Task_0fsoe1r,
+               id: :task1,
                incoming: [],
                name: "task 1",
                outgoing: [],
                type: :task
              },
              %Definition.BPMTask{
-               id: :Task_0rsgnlx,
+               id: :success,
                incoming: [],
                name: "handle success",
                outgoing: [],
                type: :task
              },
              %Definition.BPMTask{
-               id: :Task_1gfqk0h,
+               id: :faillure,
                incoming: [],
                name: "handle failure",
                outgoing: [],
@@ -79,7 +79,7 @@ defmodule BPMNParserTest do
   test "get the gateways", %{doc: doc} do
     assert BPMNParser.gateways(doc) == [
              %Definition.BPMGateway{
-               id: :ExclusiveGateway_08pnq7v,
+               id: :decide,
                incoming: [],
                name: nil,
                outgoing: [],
@@ -90,12 +90,12 @@ defmodule BPMNParserTest do
 
   test "get the sequence flows", %{doc: doc} do
     assert BPMNParser.sequence_flows(doc) == [
-             {:SequenceFlow_1bqc04t, :StartEvent_1, :Task_0fsoe1r},
-             {:SequenceFlow_1trdcoy, :Task_0fsoe1r, :ExclusiveGateway_08pnq7v},
-             {:SequenceFlow_0byeq17, :ExclusiveGateway_08pnq7v, :Task_0rsgnlx},
-             {:SequenceFlow_19mi11y, :Task_0rsgnlx, :EndEvent_019ow9h},
-             {:SequenceFlow_1eecs6l, :ExclusiveGateway_08pnq7v, :Task_1gfqk0h},
-             {:SequenceFlow_1ahnvqs, :Task_1gfqk0h, :EndEvent_1hwhq9d}
+             {:SequenceFlow_1bqc04t, :start, :task1},
+             {:SequenceFlow_1trdcoy, :task1, :decide},
+             {:SequenceFlow_0byeq17, :decide, :success},
+             {:SequenceFlow_19mi11y, :success, :EndEvent_019ow9h},
+             {:SequenceFlow_1eecs6l, :decide, :faillure},
+             {:SequenceFlow_1ahnvqs, :faillure, :EndEvent_1hwhq9d}
            ]
   end
 
@@ -116,7 +116,7 @@ defmodule BPMNParserTest do
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_19mi11y,
-                       source: {:task, :Task_0rsgnlx},
+                       source: {:task, :success},
                        target: {:event, :EndEvent_019ow9h}
                      }
                    ]
@@ -129,105 +129,105 @@ defmodule BPMNParserTest do
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1ahnvqs,
-                       source: {:task, :Task_1gfqk0h},
+                       source: {:task, :faillure},
                        target: {:event, :EndEvent_1hwhq9d}
                      }
                    ]
                  },
-                 StartEvent_1: %Definition.BPMEvent{
-                   id: :StartEvent_1,
+                 start: %Definition.BPMEvent{
+                   id: :start,
                    incoming: [],
                    name: "Start",
                    type: :startEvent,
                    outgoing: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1bqc04t,
-                       source: {:event, :StartEvent_1},
-                       target: {:task, :Task_0fsoe1r}
+                       source: {:event, :start},
+                       target: {:task, :task1}
                      }
                    ]
                  }
                },
                gateways: %{
-                 ExclusiveGateway_08pnq7v: %Definition.BPMGateway{
-                   id: :ExclusiveGateway_08pnq7v,
+                 decide: %Definition.BPMGateway{
+                   id: :decide,
                    name: nil,
                    type: :exclusiveGateway,
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1trdcoy,
-                       source: {:task, :Task_0fsoe1r},
-                       target: {:gateway, :ExclusiveGateway_08pnq7v}
+                       source: {:task, :task1},
+                       target: {:gateway, :decide}
                      }
                    ],
                    outgoing: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_0byeq17,
-                       source: {:gateway, :ExclusiveGateway_08pnq7v},
-                       target: {:task, :Task_0rsgnlx}
+                       source: {:gateway, :decide},
+                       target: {:task, :success}
                      },
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1eecs6l,
-                       source: {:gateway, :ExclusiveGateway_08pnq7v},
-                       target: {:task, :Task_1gfqk0h}
+                       source: {:gateway, :decide},
+                       target: {:task, :faillure}
                      }
                    ]
                  }
                },
                tasks: %{
-                 Task_0fsoe1r: %Definition.BPMTask{
-                   id: :Task_0fsoe1r,
+                 task1: %Definition.BPMTask{
+                   id: :task1,
                    name: "task 1",
                    type: :task,
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1bqc04t,
-                       source: {:event, :StartEvent_1},
-                       target: {:task, :Task_0fsoe1r}
+                       source: {:event, :start},
+                       target: {:task, :task1}
                      }
                    ],
                    outgoing: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1trdcoy,
-                       source: {:task, :Task_0fsoe1r},
-                       target: {:gateway, :ExclusiveGateway_08pnq7v}
+                       source: {:task, :task1},
+                       target: {:gateway, :decide}
                      }
                    ]
                  },
-                 Task_0rsgnlx: %Definition.BPMTask{
-                   id: :Task_0rsgnlx,
+                 success: %Definition.BPMTask{
+                   id: :success,
                    name: "handle success",
                    type: :task,
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_0byeq17,
-                       source: {:gateway, :ExclusiveGateway_08pnq7v},
-                       target: {:task, :Task_0rsgnlx}
+                       source: {:gateway, :decide},
+                       target: {:task, :success}
                      }
                    ],
                    outgoing: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_19mi11y,
-                       source: {:task, :Task_0rsgnlx},
+                       source: {:task, :success},
                        target: {:event, :EndEvent_019ow9h}
                      }
                    ]
                  },
-                 Task_1gfqk0h: %Definition.BPMTask{
-                   id: :Task_1gfqk0h,
+                 faillure: %Definition.BPMTask{
+                   id: :faillure,
                    name: "handle failure",
                    type: :task,
                    incoming: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1eecs6l,
-                       source: {:gateway, :ExclusiveGateway_08pnq7v},
-                       target: {:task, :Task_1gfqk0h}
+                       source: {:gateway, :decide},
+                       target: {:task, :faillure}
                      }
                    ],
                    outgoing: [
                      %Definition.BPMSequenceFlow{
                        id: :SequenceFlow_1ahnvqs,
-                       source: {:task, :Task_1gfqk0h},
+                       source: {:task, :faillure},
                        target: {:event, :EndEvent_1hwhq9d}
                      }
                    ]

@@ -6,7 +6,7 @@ defmodule   BPMProcess do
   Module.register_attribute BPMProcess, :paths, accumulate: true
 
   defmacro __using__(path) do
-    IO.puts("adding  #{path}")
+    IO.puts("adding  #{path} to #{inspect __CALLER__.context_modules }")
     quote do
       import unquote(__MODULE__)
       add_process_definitions(unquote(path))
@@ -32,7 +32,7 @@ defmodule   BPMProcess do
       "" <> rest ->
         path =
           unless String.ends_with?(path, ".bpmn") do
-            path <> "/*.bpmn"
+            {:error, "not a bpmn file"}
           else
             path
           end

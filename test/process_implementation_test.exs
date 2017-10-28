@@ -1,4 +1,4 @@
-defmodule ProcessImplementationTest do
+defmodule GatewayImplementationTest do
    use ExUnit.Case, async: true
 
     import ExUnit.CaptureIO
@@ -11,30 +11,30 @@ defmodule ProcessImplementationTest do
                                   ]
 
       test "the helper has all the functions" do
-        assert (@functions_in_implementation -- Support.ProcessImplementation.__info__ :functions)  == []
+        assert (@functions_in_implementation -- Support.GatewayImplementation.__info__ :functions)  == []
       end
 
       test "create a step" do
        assert capture_io(fn ->
-            Support.ProcessImplementation.task_mytestingId
-           end) == "testing this step" <> "\n"
+            Support.GatewayImplementation.task_mytestingId
+           end) == "Support.GatewayImplementation testing this step" <> "\n"
       end
 
       test "create a task" do
           assert capture_io(fn ->
-            Support.ProcessImplementation.task_taskId
-           end) == "testing this task" <> "\n"
+            Support.GatewayImplementation.task_taskId
+           end) == "Support.GatewayImplementation testing this task" <> "\n"
       end
 
       test "print steps" do
 
          assert capture_io(fn ->
-              Support.ProcessImplementation.print_steps
+              Support.GatewayImplementation.print_steps
              end) == "steps registered are ([{:decide}, {:start}, {:taskId}, {:mytestingId}])" <> "\n"
       end
 
    test "get a process definition by its process Id" do
-     definition = Support.ProcessImplementation.definition
+     definition = Support.GatewayImplementation.definition
      assert definition.id == :Process_1
 
    end

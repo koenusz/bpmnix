@@ -21,11 +21,20 @@ defmodule ProcessDefinition do
     Returns a list of the next steps in the process definition.
   """
   def next_step(%__MODULE__{} = process_definition, step_type_id) do
-
-
     get(process_definition, step_type_id)
     |> fn {:ok, step} -> step end.()
     |> fn step -> step.outgoing  end.()       #collect all the outgoinng sequenceflows from all the steps
+    |> Enum.map(fn outgoing -> outgoing.target  end) #get the targets.
+  end
+
+  @doc """
+    Returns a list of the next steps in the process definition. Only outgoing steps that are in the filter are considered.
+  """
+  def next_step(%__MODULE__{} = process_definition, gateway_id, outgoing_filter) do
+    get(process_definition, gateway_id)
+    |> fn {:ok, step} -> step end.()
+    |> fn step -> step.outgoing  end.()       #collect all the outgoinng sequenceflows from all the steps
+    |> Enum.filter(fn outgoing -> Enum.member?(outgoing_filter, outgoing.id) end)  #only add outgoing flows to the list that are in the filter
     |> Enum.map(fn outgoing -> outgoing.target  end) #get the targets.
   end
 
@@ -51,8 +60,6 @@ defmodule ProcessDefinition do
 
         iex> Definition.BPMProcess.add_sequence_flow(process,{:event, :event1}, {:task, :task1} )
         :ok
-
-
   """
   def add_sequence_flow(%__MODULE__{} = definition, source, target, link_id) do
 
@@ -149,7 +156,7 @@ defmodule ProcessDefinition do
   Gets a gateway from the `process` by `id`.
   """
   def get(_process, unknown) do
-    {:error, :unknown}
+    {:error, unknown}
   end
 
   @doc """
@@ -171,6 +178,12 @@ defmodule ProcessDefinition do
     %{process | gateways: Map.delete(process.gateways, gatewayId)}
   end
 
+  @doc """
+  Returns a list of all the step id's.
+  """
+  def steps(process) do
+    Map.keys(process.tasks) ++ Map.keys(process.events) ++ Map.keys(process.gateways)
+  end
 
 
 end

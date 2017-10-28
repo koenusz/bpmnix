@@ -127,6 +127,16 @@ defmodule ProcessInstanceTest do
     assert message == "no history items for version %{branch: 0, update: 10}"
   end
 
+  test "exclusive gateway takes right direction" do
+
+    instance = ProcessInstance.new_instance(1, Support.GatewayImplementation, %{name: "start_data"})
+    step1 = ProcessInstance.complete_step(instance, {:event, :start})
+    assert step1.status == [task: :task1]
+    step2 = ProcessInstance.complete_step(step1, {:task, :task1})
+    assert step2.status == [gateway: :decide]
+    step3 = ProcessInstance.complete_step(step2, {:gateway, :decide})
+    assert step3.status == [task: :faillure]
+  end
 
 
 end

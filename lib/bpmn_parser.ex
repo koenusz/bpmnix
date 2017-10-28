@@ -147,7 +147,6 @@ defmodule BPMNParser do
   process element.
   """
   def process_definition doc do
-
     [process_definition] =
       xpath(doc, ~x"//bpmn:process"l)
       |> Enum.map(
@@ -174,7 +173,6 @@ defmodule BPMNParser do
          def_with_steps,
          fn flow, definition ->
            {id, source_id, target_id} = flow
-
            ProcessDefinition.add_sequence_flow(
              definition,
              {get_step_type(steps, source_id), source_id},
@@ -187,14 +185,16 @@ defmodule BPMNParser do
   end
 
   defp get_step_type(steps, id) do
+
     case Enum.filter(steps, fn step -> step.id == id end) do
       [step] -> step
-      [] -> IO.warn("The type for #{inspect id} is not defined in the parser", Macro.Env.stacktrace(__ENV__))
+      [] -> {:error, "type for #{inspect id} not found"}
     end
     |> case do
          %BPMEvent{} -> :event
          %BPMGateway{} -> :gateway
          %BPMTask{} -> :task
+         {:error, message} -> {:error, message}
        end
   end
 

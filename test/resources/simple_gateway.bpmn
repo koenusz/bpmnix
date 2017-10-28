@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:process id="Process_1" isExecutable="false">
-    <bpmn:startEvent id="StartEvent_1" name="Start">
+    <bpmn:startEvent id="start" name="Start">
       <bpmn:outgoing>SequenceFlow_1bqc04t</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Task_0fsoe1r" name="task 1">
+    <bpmn:task id="task1" name="task 1">
       <bpmn:incoming>SequenceFlow_1bqc04t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1trdcoy</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="SequenceFlow_1bqc04t" sourceRef="StartEvent_1" targetRef="Task_0fsoe1r" />
-    <bpmn:exclusiveGateway id="ExclusiveGateway_08pnq7v" default="SequenceFlow_0byeq17">
+    <bpmn:sequenceFlow id="SequenceFlow_1bqc04t" sourceRef="start" targetRef="task1" />
+    <bpmn:exclusiveGateway id="decide" default="SequenceFlow_0byeq17">
       <bpmn:incoming>SequenceFlow_1trdcoy</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0byeq17</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1eecs6l</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_1trdcoy" sourceRef="Task_0fsoe1r" targetRef="ExclusiveGateway_08pnq7v" />
-    <bpmn:task id="Task_0rsgnlx" name="handle success">
+    <bpmn:sequenceFlow id="SequenceFlow_1trdcoy" sourceRef="task1" targetRef="decide" />
+    <bpmn:task id="success" name="handle success">
       <bpmn:incoming>SequenceFlow_0byeq17</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_19mi11y</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="SequenceFlow_0byeq17" sourceRef="ExclusiveGateway_08pnq7v" targetRef="Task_0rsgnlx" />
+    <bpmn:sequenceFlow id="SequenceFlow_0byeq17" sourceRef="decide" targetRef="success" />
     <bpmn:endEvent id="EndEvent_019ow9h">
       <bpmn:incoming>SequenceFlow_19mi11y</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_19mi11y</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_19mi11y" sourceRef="Task_0rsgnlx" targetRef="EndEvent_019ow9h" />
-    <bpmn:task id="Task_1gfqk0h" name="handle failure">
+    <bpmn:sequenceFlow id="SequenceFlow_19mi11y" sourceRef="success" targetRef="EndEvent_019ow9h" />
+    <bpmn:task id="faillure" name="handle failure">
       <bpmn:incoming>SequenceFlow_1eecs6l</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ahnvqs</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="SequenceFlow_1eecs6l" sourceRef="ExclusiveGateway_08pnq7v" targetRef="Task_1gfqk0h" />
+    <bpmn:sequenceFlow id="SequenceFlow_1eecs6l" sourceRef="decide" targetRef="faillure" />
     <bpmn:endEvent id="EndEvent_1hwhq9d">
       <bpmn:incoming>SequenceFlow_1ahnvqs</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1ahnvqs" sourceRef="Task_1gfqk0h" targetRef="EndEvent_1hwhq9d" />
+    <bpmn:sequenceFlow id="SequenceFlow_1ahnvqs" sourceRef="faillure" targetRef="EndEvent_1hwhq9d" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -65,7 +66,7 @@
           <dc:Bounds x="474.5" y="99" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Task_0rsgnlx_di" bpmnElement="Task_0rsgnlx">
+      <bpmndi:BPMNShape id="success_di" bpmnElement="success">
         <dc:Bounds x="698" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0byeq17_di" bpmnElement="SequenceFlow_0byeq17">
@@ -88,7 +89,7 @@
           <dc:Bounds x="848.5" y="99" width="0" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Task_1gfqk0h_di" bpmnElement="Task_1gfqk0h">
+      <bpmndi:BPMNShape id="faillure_di" bpmnElement="faillure">
         <dc:Bounds x="698" y="214" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1eecs6l_di" bpmnElement="SequenceFlow_1eecs6l">

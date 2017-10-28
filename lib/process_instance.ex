@@ -36,17 +36,41 @@ defmodule ProcessInstance do
     %ProcessInstance{id: id, process_implementation: implementation, data: data}
   end
 
+  @doc """
+  Determines the next step for this instance and updates the status and the history.
+  """
+  def complete_step(instance, {:gateway, gateway_id}) do
+    if(Enum.member?(instance.status, {:gateway, gateway_id})) do
 
+      gateway_implementation_function =
+        Atom.to_string(:gateway) <> "_" <> Atom.to_string(gateway_id)
+        |> String.to_atom
+      outgoing_filter = apply(instance.process_implementation, gateway_implementation_function, [])
+      next_steps = ProcessDefinition.next_step instance.process_implementation.definition,
+                                               {:gateway, gateway_id},
+                                               outgoing_filter
+
+      new_status =
+        instance.status
+        |> List.delete({:gateway, gateway_id})
+        |> Kernel.++(next_steps)
+
+      %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
+    else
+      {:error, "Instance Status #{inspect instance.status} does not contain #{inspect {:gateway, gateway_id}}"}
+    end
+  end
 
   @doc """
   Determines the next step for this instance and updates the status and the history.
   """
   def complete_step(instance, step) do
     if(Enum.member?(instance.status, step)) do
-      next_step = ProcessDefinition.next_step instance.process_implementation.definition, step
-      new_status = instance.status
-                   |> List.delete(step)
-                   |> Kernel.++(next_step)
+      next_steps = ProcessDefinition.next_step instance.process_implementation.definition, step
+      new_status =
+        instance.status
+        |> List.delete(step)
+        |> Kernel.++(next_steps)
 
       %{instance | status: new_status, history: update_history(instance), version: version_update(instance)}
     else
@@ -54,9 +78,7 @@ defmodule ProcessInstance do
     end
   end
 
-  def gateway_open?(instance, {gateway}) do
-    
-  end
+
 
   @doc """
   Updates the data map in the data field, adds a new history item and increases
@@ -85,7 +107,7 @@ defmodule ProcessInstance do
     %{instance | completed?: true}
 
   end
-  
+
   @doc """
   Rewinds the instance to the state the instance was in when it had the specified version.
   It will not recieve the specified version as new version. Rather it will set the update to 0
